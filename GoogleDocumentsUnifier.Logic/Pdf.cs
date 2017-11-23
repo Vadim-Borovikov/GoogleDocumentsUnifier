@@ -1,41 +1,47 @@
 ﻿using System;
 using System.IO;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 
 namespace GoogleDocumentsUnifier.Logic
 {
-    public class Pdf
+    public class Pdf : IDisposable
     {
         public Pdf()
         {
-            throw new NotImplementedException();
+            _document = new PdfDocument();
         }
 
         public Pdf(Stream outputStream)
         {
-            throw new NotImplementedException();
+            _document = PdfReader.Open(outputStream, PdfDocumentOpenMode.Import);
+        }
+
+        public void Dispose()
+        {
+            _document.Dispose();
         }
 
         public void AddEmptyPage()
         {
-            throw new NotImplementedException();
+            _document.AddPage();
         }
 
         public void AddAllPages(Pdf pdf)
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < pdf.PagesAmount; ++i)
+            {
+                _document.AddPage(pdf._document.Pages[i]);
+            }
         }
 
         public void Save(string path)
         {
-            throw new NotImplementedException();
+            _document.Save(path);
         }
 
-        public int PagesAmount
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        private readonly PdfDocument _document;
+
+        public int PagesAmount => _document.PageCount;
     }
 }

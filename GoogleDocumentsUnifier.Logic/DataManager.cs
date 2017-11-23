@@ -26,19 +26,22 @@ namespace GoogleDocumentsUnifier.Logic
 
         public void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
         {
-            var result = new Pdf();
-
-            foreach (DocumentRequest request in requests)
+            using (var result = new Pdf())
             {
-                using (var stream = new MemoryStream())
+                foreach (DocumentRequest request in requests)
                 {
-                    SetupStream(stream, request.Info);
-                    var pdf = new Pdf(stream);
-                    ImportEvens(pdf, result, request.Amount);
+                    using (var stream = new MemoryStream())
+                    {
+                        SetupStream(stream, request.Info);
+                        using (var pdf = new Pdf(stream))
+                        {
+                            ImportEvens(pdf, result, request.Amount);
+                        }
+                    }
                 }
-            }
 
-            result.Save(resultPath);
+                result.Save(resultPath);
+            }
         }
 
         private void SetupStream(Stream stream, DocumentInfo info)
