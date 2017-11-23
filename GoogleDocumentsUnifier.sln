@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier", "GoogleDocumentsUnifier\GoogleDocumentsUnifier.csproj", "{9C197C10-60E0-41F0-8AC9-EE04B44CA8F0}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Logic", "GoogleDocumentsUnifier.Logic\GoogleDocumentsUnifier.Logic.csproj", "{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.LogicTests", "GoogleDocumentsUnifier.LogicTests\GoogleDocumentsUnifier.LogicTests.csproj", "{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier", "GoogleDocumentsUnifier\GoogleDocumentsUnifier.csproj", "{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9C197C10-60E0-41F0-8AC9-EE04B44CA8F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C197C10-60E0-41F0-8AC9-EE04B44CA8F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C197C10-60E0-41F0-8AC9-EE04B44CA8F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C197C10-60E0-41F0-8AC9-EE04B44CA8F0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +23,10 @@ Global
 		{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
