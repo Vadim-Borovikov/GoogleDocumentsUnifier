@@ -42,7 +42,8 @@ namespace GoogleDocumentsUnifier
                 new DocumentRequest(_needs, DoubleToUint(NeedsUpDown.Value))
             };
             string path = PathTextBox.Text.Replace('/', '\\');
-            await Task.Run(() => _dataManager.Unify(requests, path));
+            bool makeEvens = DoubleSideCheckBox.IsChecked.HasValue && DoubleSideCheckBox.IsChecked.Value;
+            await Task.Run(() => _dataManager.Unify(requests, path, makeEvens));
 
             ShowFile(path);
             Close();

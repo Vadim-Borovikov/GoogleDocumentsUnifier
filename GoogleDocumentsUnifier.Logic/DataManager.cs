@@ -24,7 +24,7 @@ namespace GoogleDocumentsUnifier.Logic
             _provider.Dispose();
         }
 
-        public void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
+        public void Unify(IEnumerable<DocumentRequest> requests, string resultPath, bool makeEvens)
         {
             using (var result = new Pdf())
             {
@@ -35,7 +35,7 @@ namespace GoogleDocumentsUnifier.Logic
                         SetupStream(stream, request.Info);
                         using (var pdf = new Pdf(stream))
                         {
-                            ImportEvens(pdf, result, request.Amount);
+                            Import(pdf, result, request.Amount, makeEvens);
                         }
                     }
                 }
@@ -65,9 +65,12 @@ namespace GoogleDocumentsUnifier.Logic
             }
         }
 
-        private static void ImportEvens(Pdf source, Pdf target, uint amount)
+        private static void Import(Pdf source, Pdf target, uint amount, bool makeEvens)
         {
-            MakePdfPagesCountEven(source);
+            if (makeEvens)
+            {
+                MakePdfPagesCountEven(source);
+            }
 
             for (uint i = 0; i < amount; ++i)
             {
