@@ -20,9 +20,9 @@ namespace GoogleDocumentsUnifier
             string[] docIds = ConfigurationManager.AppSettings.Get("docIds").Split(';');
             string[] pdfIds = ConfigurationManager.AppSettings.Get("pdfIds").Split(';');
 
-            _thesises = new DocumentInfo(docIds[0], false);
-            _feelings = new DocumentInfo(pdfIds[0], true);
-            _needs = new DocumentInfo(docIds[1], false);
+            _thesises = new DocumentInfo(docIds[0], DocumentType.GoogleDocument);
+            _feelings = new DocumentInfo(pdfIds[0], DocumentType.GooglePdf);
+            _needs = new DocumentInfo(docIds[1], DocumentType.GoogleDocument);
             _dataManager = new DataManager(clientSecretPath);
         }
 

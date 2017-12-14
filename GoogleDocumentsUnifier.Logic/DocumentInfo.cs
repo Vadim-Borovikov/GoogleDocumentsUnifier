@@ -2,13 +2,13 @@
 {
     public class DocumentInfo
     {
-        public readonly string Id;
-        public readonly bool IsPdfAlready;
+        internal readonly string Id;
+        internal readonly DocumentType DocumentType;
 
-        public DocumentInfo(string id, bool isPdfAlready)
+        public DocumentInfo(string id, DocumentType documentType)
         {
             Id = id;
-            IsPdfAlready = isPdfAlready;
+            DocumentType = documentType;
         }
     }
 }

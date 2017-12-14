@@ -95,6 +95,7 @@
     <Compile Include="DataManager.cs" />
     <Compile Include="DocumentInfo.cs" />
     <Compile Include="DocumentRequest.cs" />
+    <Compile Include="DocumentType.cs" />
     <Compile Include="GoogleApisDriveProvider.cs" />
     <Compile Include="Pdf.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

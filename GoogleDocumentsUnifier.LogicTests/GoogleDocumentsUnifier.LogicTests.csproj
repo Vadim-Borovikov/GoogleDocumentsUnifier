@@ -51,6 +51,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DataManagerTests.cs" />
     <Compile Include="GoogleApisDriveProviderTests.cs" />
     <Compile Include="PdfTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

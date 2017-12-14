@@ -46,13 +46,22 @@ namespace GoogleDocumentsUnifier.Logic
 
         private void SetupStream(Stream stream, DocumentInfo info)
         {
-            if (info.IsPdfAlready)
+            switch (info.DocumentType)
             {
-                _provider.DownloadFile(info.Id, stream);
-            }
-            else
-            {
-                _provider.ExportFile(info.Id, PdfMimeType, stream);
+                case DocumentType.LocalPdf:
+                    using (var file = new FileStream(info.Id, FileMode.Open, FileAccess.Read))
+                    {
+                        file.CopyTo(stream);
+                    }
+                    break;
+                case DocumentType.GooglePdf:
+                    _provider.DownloadFile(info.Id, stream);
+                    break;
+                case DocumentType.GoogleDocument:
+                    _provider.ExportFile(info.Id, PdfMimeType, stream);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(info.DocumentType));
             }
         }
 
