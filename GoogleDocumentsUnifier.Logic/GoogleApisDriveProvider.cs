@@ -52,5 +52,7 @@ namespace GoogleDocumentsUnifier.Logic
             FilesResource.ExportRequest request = _driveService.Files.Export(id, targetMimeType);
             request.Download(stream);
         }
+
+        internal string GetName(string id) => _driveService.Files.Get(id).Execute().Name;
     }
 }

@@ -2,8 +2,8 @@
 {
     public class DocumentInfo
     {
-        internal readonly string Id;
-        internal readonly DocumentType DocumentType;
+        public readonly string Id;
+        public readonly DocumentType DocumentType;
 
         public DocumentInfo(string id, DocumentType documentType)
         {

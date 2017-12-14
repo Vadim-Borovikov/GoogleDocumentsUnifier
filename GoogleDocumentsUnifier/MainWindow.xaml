@@ -3,21 +3,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:GoogleDocumentsUnifier"
-        xmlns:controlLib="clr-namespace:ControlLib;assembly=NumericUpDown"
         mc:Ignorable="d"
         Title="GoogleDocumentsUnifier" Height="180" Width="444" MinHeight="180" MinWidth="444"
         x:ClassModifier="internal" Closing="WindowClosing">
     <Grid>
-        <CheckBox Name="DoubleSideCheckBox" Content="Для двусторонней печати" HorizontalAlignment="Left" Margin="10,80,0,0" VerticalAlignment="Top" IsChecked="True"/>
-        <Label Content="Тезисы" Margin="0,11,55,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="49"/>
-        <controlLib:NumericUpDown x:Name="ThesisesUpDown" Value="5" Margin="0,10,10,0" Width="40" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" />
-        <Label Content="Чувства" HorizontalAlignment="Right" Margin="0,43,55,0" VerticalAlignment="Top"/>
-        <controlLib:NumericUpDown x:Name="FeelingsUpDown" Value="5" Margin="0,42,10,0" Width="40" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" />
-        <Label Content="Нужды" Margin="0,75,55,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="48"/>
-        <controlLib:NumericUpDown Name="NeedsUpDown" Value="5" Margin="0,74,10,0" Width="40" Height="27" VerticalAlignment="Top" HorizontalAlignment="Right" />
-        <Label Content="Путь" HorizontalAlignment="Left" Margin="10,106,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="PathTextBox" Margin="50,108,148,0" TextWrapping="Wrap" Text="D:/Downloads/nvc.pdf" Height="23" VerticalAlignment="Top"/>
-        <Button Name="Button" Content="Скачать и объединить" Margin="0,109,10,0" HorizontalAlignment="Right" Width="133" Height="22" VerticalAlignment="Top" Click="button_Click" IsDefault="True"/>
+        <CheckBox Name="DoubleSideCheckBox" Content="Для двусторонней печати" HorizontalAlignment="Left" Margin="10,0,0,38" VerticalAlignment="Bottom" IsChecked="True"/>
+        <ScrollViewer Margin="175,10,10,38" VerticalScrollBarVisibility="Auto">
+            <Grid Name="Grid" VerticalAlignment="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170*"/>
+                    <ColumnDefinition Width="69*"/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+        </ScrollViewer>
+        <Label Content="Путь" HorizontalAlignment="Left" Margin="10,0,0,10" Height="26" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="PathTextBox" Margin="50,0,148,10" TextWrapping="Wrap" Text="D:/Downloads/nvc.pdf" Height="23" VerticalAlignment="Bottom"/>
+        <Button Name="Button" Content="Скачать и объединить" Margin="0,0,10,10" HorizontalAlignment="Right" Width="133" Click="button_Click" IsDefault="True" Height="22" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

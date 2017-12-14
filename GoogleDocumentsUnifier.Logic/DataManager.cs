@@ -24,6 +24,8 @@ namespace GoogleDocumentsUnifier.Logic
             _provider.Dispose();
         }
 
+        public string GetName(string id) => _provider.GetName(id);
+
         public void Unify(IEnumerable<DocumentRequest> requests, string resultPath, bool makeEvens)
         {
             using (var result = new Pdf())
