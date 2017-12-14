@@ -25,28 +25,21 @@ namespace GoogleDocumentsUnifier
             _dataManager = new DataManager(clientSecretPath);
             _amounts = new Dictionary<DocumentInfo, NumericUpDown>();
 
-            string[] pdfPaths = ConfigurationManager.AppSettings.Get("pdfPaths")?.Split(';') ?? new string[0];
-            foreach (string id in pdfPaths)
+            var section = (SourcesConfigSection)ConfigurationManager.GetSection("SourcesSection");
+            if (section == null)
             {
-                AddSource(id, DocumentType.LocalPdf);
+                return;
             }
 
-            string[] pdfIds = ConfigurationManager.AppSettings.Get("pdfIds")?.Split(';') ?? new string[0];
-            foreach (string name in pdfIds)
+            foreach (SourceElement source in section.SourcesItems)
             {
-                AddSource(name, DocumentType.GooglePdf);
-            }
-
-            string[] docIds = ConfigurationManager.AppSettings.Get("docIds")?.Split(';') ?? new string[0];
-            foreach (string name in docIds)
-            {
-                AddSource(name, DocumentType.GoogleDocument);
+                AddSource(source);
             }
         }
 
-        private void AddSource(string id, DocumentType documentType)
+        private void AddSource(SourceElement source)
         {
-            var info = new DocumentInfo(id, documentType);
+            var info = new DocumentInfo(source.Id, source.Type);
 
             string name = GetName(info);
             var textBlock = new TextBlock
