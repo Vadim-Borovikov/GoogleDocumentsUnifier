@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading;
 
 namespace GoogleDocumentsUnifier.Logic
@@ -54,6 +55,13 @@ namespace GoogleDocumentsUnifier.Logic
                     using (var file = new FileStream(info.Id, FileMode.Open, FileAccess.Read))
                     {
                         file.CopyTo(stream);
+                    }
+                    break;
+                case DocumentType.WebPdf:
+                    using (var client = new WebClient())
+                    {
+                        byte[] data = client.DownloadData(info.Id);
+                        stream.Write(data, 0, data.Length);
                     }
                     break;
                 case DocumentType.GooglePdf:

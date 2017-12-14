@@ -71,6 +71,7 @@ namespace GoogleDocumentsUnifier
             switch (info.DocumentType)
             {
                 case DocumentType.LocalPdf:
+                case DocumentType.WebPdf:
                     return Path.GetFileName(info.Id);
                 case DocumentType.GooglePdf:
                 case DocumentType.GoogleDocument:

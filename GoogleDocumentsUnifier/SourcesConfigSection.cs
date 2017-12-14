@@ -38,6 +38,8 @@ namespace GoogleDocumentsUnifier
                 {
                     case "pdfPath":
                         return DocumentType.LocalPdf;
+                    case "pdfUrl":
+                        return DocumentType.WebPdf;
                     case "pdfId":
                         return DocumentType.GooglePdf;
                     case "docId":
