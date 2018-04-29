@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Logic", "GoogleDocumentsUnifier.Logic\GoogleDocumentsUnifier.Logic.csproj", "{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.LogicTests", "GoogleDocumentsUnifier.LogicTests\GoogleDocumentsUnifier.LogicTests.csproj", "{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier", "GoogleDocumentsUnifier\GoogleDocumentsUnifier.csproj", "{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoscowNvcBot.Console", "MoscowNvcBot.Console\MoscowNvcBot.Console.csproj", "{D53EB328-604F-4C1E-B2A4-F48286A570DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
