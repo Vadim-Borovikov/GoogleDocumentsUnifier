@@ -5,6 +5,6 @@
         LocalPdf,
         WebPdf,
         GooglePdf,
-        GoogleDocument,
+        GoogleDocument
     }
 }
