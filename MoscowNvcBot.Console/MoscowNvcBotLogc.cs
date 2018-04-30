@@ -1,5 +1,7 @@
-﻿using GoogleDocumentsUnifier.Logic;
+﻿using System.Collections.Generic;
+using GoogleDocumentsUnifier.Logic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
@@ -14,20 +16,16 @@ namespace MoscowNvcBot.Console
     {
         public readonly TelegramBotClient Bot;
 
-        private readonly GoogleApisDriveProvider _googleProvider;
+        private readonly DataManager _googleDataManager;
 
-        private readonly string _checklistId;
-        private readonly string _casesId;
-        private readonly string _empathyId;
+        private readonly Dictionary<string, DocumentInfo> _sources;
 
-        public MoscowNvcBotLogc(string token, string checklistId, string casesId, string empathyId,
-                                GoogleApisDriveProvider googleProvider)
+        public MoscowNvcBotLogc(string token, Dictionary<string, DocumentInfo> sources,
+                                DataManager googleDataManager)
         {
-            _googleProvider = googleProvider;
+            _googleDataManager = googleDataManager;
 
-            _checklistId = checklistId;
-            _casesId = casesId;
-            _empathyId = empathyId;
+            _sources = sources;
 
             Bot = new TelegramBotClient(token);
             Bot.OnMessage += OnMessageReceived;
@@ -42,7 +40,7 @@ namespace MoscowNvcBot.Console
 
             System.Console.WriteLine(e.Message.Text);
 
-            FileToSend pdf;
+            string[] names;
 
             switch (e.Message.Text)
             {
@@ -50,27 +48,42 @@ namespace MoscowNvcBot.Console
                     await ShowOptions(e.Message.Chat.Id);
                     break;
                 case "Подготовка":
-                    await SendGooglePdf(e.Message.Chat.Id, "Подготовка.pdf", _checklistId);
+                    names = new[] { "checklist" };
+                    await SendGooglePdf(e.Message.Chat.Id, "Подготовка.pdf", names);
                     break;
                 case "Разбор случаев":
-                    await SendGooglePdf(e.Message.Chat.Id, "Разбор случаев.pdf", _casesId);
+                    names = new[]
+                    {
+                        "landing",
+                        "cases_manual",
+                        "cases_template",
+                        "feelings",
+                        "needs"
+                    };
+                    await SendGooglePdf(e.Message.Chat.Id, "Разбор случаев.pdf", names);
                     break;
                 case "Эмпатия":
-                    await SendGooglePdf(e.Message.Chat.Id, "Эмпатия.pdf", _empathyId);
+                    names = new[]
+                    {
+                        "landing",
+                        "empathy_manual",
+                        "feelings",
+                        "needs"
+                    };
+                    await SendGooglePdf(e.Message.Chat.Id, "Эмпатия.pdf", names);
                     break;
             }
         }
 
-        private async Task SendGooglePdf(long chatId, string name, string pdfId)
+        private async Task SendGooglePdf(long chatId, string name, IEnumerable<string> names)
         {
             await Bot.SendChatActionAsync(chatId, ChatAction.UploadDocument);
 
+            IEnumerable<DocumentRequest> requests =
+                names.Select(n => new DocumentRequest(_sources[n], 1));
+
             string path = Path.GetTempFileName();
-            using (var downloadStream = new MemoryStream())
-            {
-                _googleProvider.DownloadFile(pdfId, downloadStream);
-                File.WriteAllBytes(path, downloadStream.ToArray());
-            }
+            _googleDataManager.Unify(requests, path, false);
 
             using (var fileStream = new FileStream(path, FileMode.Open))
             {

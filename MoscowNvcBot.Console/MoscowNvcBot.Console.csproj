@@ -68,6 +68,10 @@
       <Project>{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}</Project>
       <Name>GoogleDocumentsUnifier.Logic</Name>
     </ProjectReference>
+    <ProjectReference Include="..\GoogleDocumentsUnifier\GoogleDocumentsUnifier.csproj">
+      <Project>{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}</Project>
+      <Name>GoogleDocumentsUnifier</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

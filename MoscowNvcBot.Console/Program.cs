@@ -1,7 +1,6 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
-using System.Threading;
+using System.Linq;
 using GoogleDocumentsUnifier.Logic;
 using Telegram.Bot.Types;
 
@@ -14,30 +13,38 @@ namespace MoscowNvcBot.Console
             string clientSecretPath = ConfigurationManager.AppSettings.Get("clientSecretPath");
 
             string token = ConfigurationManager.AppSettings.Get("token");
-            string checklistId = ConfigurationManager.AppSettings.Get("checklistId");
-            string casesId = ConfigurationManager.AppSettings.Get("casesId");
-            string empathyId = ConfigurationManager.AppSettings.Get("empathyId");
-
-            using (var stream = new FileStream(clientSecretPath, FileMode.Open, FileAccess.Read))
+            if (string.IsNullOrWhiteSpace(token))
             {
-                string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                string credentialPath =
-                    Path.Combine(folderPath, ".credentials/drive-dotnet-quickstart.json");
+                return;
+            }
 
-                using (var googleProvider =
-                    new GoogleApisDriveProvider(stream, credentialPath, "user", CancellationToken.None))
-                {
-                    var botLogic =
-                        new MoscowNvcBotLogc(token, checklistId, casesId, empathyId, googleProvider);
+            string[] names =
+            {
+                "checklist",
+                "landing",
+                "cases_manual",
+                "cases_template",
+                "empathy_manual",
+                "feelings",
+                "needs"
+            };
 
-                    User me = botLogic.Bot.GetMeAsync().Result;
-                    System.Console.Title = me.Username;
+            Dictionary<string, DocumentInfo> sources =
+                names.ToDictionary(n => n,
+                                   n => new DocumentInfo(ConfigurationManager.AppSettings.Get(n),
+                                                         DocumentType.GoogleDocument));
 
-                    botLogic.Bot.StartReceiving();
-                    System.Console.WriteLine($"Start listening for @{me.Username}");
-                    System.Console.ReadLine();
-                    botLogic.Bot.StopReceiving();
-                }
+            using (var googleDataManager = new DataManager(clientSecretPath))
+            {
+                var botLogic = new MoscowNvcBotLogc(token, sources, googleDataManager);
+
+                User me = botLogic.Bot.GetMeAsync().Result;
+                System.Console.Title = me.Username;
+
+                botLogic.Bot.StartReceiving();
+                System.Console.WriteLine($"Start listening for @{me.Username}");
+                System.Console.ReadLine();
+                botLogic.Bot.StopReceiving();
             }
         }
     }
