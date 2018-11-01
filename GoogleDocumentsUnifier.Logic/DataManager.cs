@@ -27,23 +27,38 @@ namespace GoogleDocumentsUnifier.Logic
 
         public string GetName(string id) => _provider.GetName(id);
 
+        public void Copy(DocumentRequest request, string resultPath, bool makeEvens)
+        {
+            using (var result = new Pdf())
+            {
+                Import(request, result, makeEvens);
+
+                result.Save(resultPath);
+            }
+        }
+
         public void Unify(IEnumerable<DocumentRequest> requests, string resultPath, bool makeEvens)
         {
             using (var result = new Pdf())
             {
                 foreach (DocumentRequest request in requests)
                 {
-                    using (var stream = new MemoryStream())
-                    {
-                        SetupStream(stream, request.Info);
-                        using (var pdf = new Pdf(stream))
-                        {
-                            Import(pdf, result, request.Amount, makeEvens);
-                        }
-                    }
+                    Import(request, result, makeEvens);
                 }
 
                 result.Save(resultPath);
+            }
+        }
+
+        private void Import(DocumentRequest request, Pdf result, bool makeEvens)
+        {
+            using (var stream = new MemoryStream())
+            {
+                SetupStream(stream, request.Info);
+                using (var pdf = new Pdf(stream))
+                {
+                    Import(pdf, result, request.Amount, makeEvens);
+                }
             }
         }
 
