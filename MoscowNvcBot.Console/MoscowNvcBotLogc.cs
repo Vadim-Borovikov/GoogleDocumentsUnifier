@@ -68,7 +68,7 @@ namespace MoscowNvcBot.Console
                     name = "cases_template";
                     await SendGooglePdf(e.Message.Chat.Id, "Выражаем своё состояние.pdf", name);
                     name = "empathy_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Как поняти собеседника.pdf", name);
+                    await SendGooglePdf(e.Message.Chat.Id, "Как понять собеседника.pdf", name);
                     name = "feelings";
                     await SendGooglePdf(e.Message.Chat.Id, "Перечень чувств.pdf", name);
                     name = "needs";
