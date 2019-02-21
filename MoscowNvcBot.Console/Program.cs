@@ -22,9 +22,13 @@ namespace MoscowNvcBot.Console
             {
                 "checklist",
                 "landing",
-                "cases_manual",
-                "cases_template",
+                "case_manual",
+                "case_template",
                 "empathy_manual",
+                "conflict_manual",
+                "refusals_manual",
+                "power_words_manual",
+                "exercises",
                 "feelings",
                 "needs"
             };
