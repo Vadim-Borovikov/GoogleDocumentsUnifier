@@ -46,13 +46,17 @@ namespace MoscowNvcBot.Console
                     await ShowOptions(e.Message.Chat.Id);
                     break;
                 case "Все раздатки вместе":
-                    string[] names = new[]
+                    string[] names =
                     {
                         "checklist",
                         "landing",
-                        "cases_manual",
-                        "cases_template",
+                        "case_manual",
+                        "case_template",
                         "empathy_manual",
+                        "conflict_manual",
+                        "refusals_manual",
+                        "power_words_manual",
+                        "exercises",
                         "feelings",
                         "needs"
                     };
@@ -63,12 +67,20 @@ namespace MoscowNvcBot.Console
                     await SendGooglePdf(e.Message.Chat.Id, "Подготовка к занятию.pdf", name);
                     name = "landing";
                     await SendGooglePdf(e.Message.Chat.Id, "Памятка.pdf", name);
-                    name = "cases_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Как выразить своё состояние.pdf", name);
-                    name = "cases_template";
-                    await SendGooglePdf(e.Message.Chat.Id, "Выражаем своё состояние.pdf", name);
+                    name = "case_manual";
+                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Случай».pdf", name);
+                    name = "case_template";
+                    await SendGooglePdf(e.Message.Chat.Id, "Исследуем своё состояние.pdf", name);
                     name = "empathy_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Как понять собеседника.pdf", name);
+                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Эмпатия».pdf", name);
+                    name = "conflict_manual";
+                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Конфликт».pdf", name);
+                    name = "refusals_manual";
+                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Отказы».pdf", name);
+                    name = "power_words_manual";
+                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Слова силы».pdf", name);
+                    name = "exercises";
+                    await SendGooglePdf(e.Message.Chat.Id, "Упражнения ННО.pdf", name);
                     name = "feelings";
                     await SendGooglePdf(e.Message.Chat.Id, "Перечень чувств.pdf", name);
                     name = "needs";
@@ -94,7 +106,7 @@ namespace MoscowNvcBot.Console
         {
             await Bot.SendChatActionAsync(chatId, ChatAction.UploadDocument);
 
-            DocumentRequest request = new DocumentRequest(_sources[name], 1);
+            var request = new DocumentRequest(_sources[name], 1);
 
             string path = Path.GetTempFileName();
             _googleDataManager.Copy(request, path, false);
