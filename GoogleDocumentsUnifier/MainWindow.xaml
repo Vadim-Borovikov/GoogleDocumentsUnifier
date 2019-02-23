@@ -7,7 +7,7 @@
         Title="GoogleDocumentsUnifier" Height="180" Width="444" MinHeight="180" MinWidth="444"
         x:ClassModifier="internal" Closing="WindowClosing">
     <Grid>
-        <CheckBox Name="DoubleSideCheckBox" Content="Для двусторонней печати" HorizontalAlignment="Left" Margin="10,0,0,38" VerticalAlignment="Bottom" IsChecked="True"/>
+        <CheckBox Name="DoubleSideCheckBox" Content="Для двусторонней печати" HorizontalAlignment="Left" Margin="10,0,0,38" VerticalAlignment="Bottom" IsChecked="False"/>
         <ScrollViewer Margin="175,10,10,38" VerticalScrollBarVisibility="Auto">
             <Grid Name="Grid" VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
