@@ -36,8 +36,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NumericUpDown, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NumericUpDown.3.0.1.0\lib\NumericUpDown.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\NumericUpDown.3.0.2\lib\NumericUpDown.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

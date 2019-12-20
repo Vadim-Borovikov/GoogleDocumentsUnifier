@@ -5,8 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
-using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 using File = System.IO.File;
 
@@ -33,7 +33,7 @@ namespace MoscowNvcBot.Console
 
         private async void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            if (e.Message.Type != MessageType.TextMessage)
+            if (e.Message.Type != MessageType.Text)
             {
                 return;
             }
@@ -118,7 +118,7 @@ namespace MoscowNvcBot.Console
         {
             using (var fileStream = new FileStream(path, FileMode.Open))
             {
-                var pdf = new FileToSend(fileName, fileStream);
+                var pdf = new InputOnlineFile(fileStream, fileName);
                 await Bot.SendDocumentAsync(chatId, pdf);
             }
             File.Delete(path);
