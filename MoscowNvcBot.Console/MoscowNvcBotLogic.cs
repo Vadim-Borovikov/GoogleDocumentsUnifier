@@ -18,14 +18,13 @@ namespace MoscowNvcBot.Console
 
         private readonly DataManager _googleDataManager;
 
-        private readonly Dictionary<string, DocumentInfo> _sources;
+        private readonly List<DocumentInfo> _infos;
 
-        public MoscowNvcBotLogic(string token, Dictionary<string, DocumentInfo> sources,
-                                DataManager googleDataManager)
+        public MoscowNvcBotLogic(string token, List<DocumentInfo> infos, DataManager googleDataManager)
         {
             _googleDataManager = googleDataManager;
 
-            _sources = sources;
+            _infos = infos;
 
             Bot = new TelegramBotClient(token);
             Bot.OnMessage += OnMessageReceived;
@@ -46,55 +45,22 @@ namespace MoscowNvcBot.Console
                     await ShowOptions(e.Message.Chat.Id);
                     break;
                 case "Все раздатки вместе":
-                    string[] names =
-                    {
-                        "checklist",
-                        "landing",
-                        "case_manual",
-                        "case_template",
-                        "empathy_manual",
-                        "conflict_manual",
-                        "refusals_manual",
-                        "power_words_manual",
-                        "exercises",
-                        "feelings",
-                        "needs"
-                    };
-                    await SendGooglePdf(e.Message.Chat.Id, "Все раздатки вместе.pdf", names);
+                    await SendGooglePdf(e.Message.Chat.Id, "Все раздатки вместе.pdf", _infos);
                     break;
                 case "Все раздатки по отдельности":
-                    string name = "checklist";
-                    await SendGooglePdf(e.Message.Chat.Id, "Подготовка к занятию.pdf", name);
-                    name = "landing";
-                    await SendGooglePdf(e.Message.Chat.Id, "Памятка.pdf", name);
-                    name = "case_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Случай».pdf", name);
-                    name = "case_template";
-                    await SendGooglePdf(e.Message.Chat.Id, "Исследуем своё состояние.pdf", name);
-                    name = "empathy_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Эмпатия».pdf", name);
-                    name = "conflict_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Конфликт».pdf", name);
-                    name = "refusals_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Отказы».pdf", name);
-                    name = "power_words_manual";
-                    await SendGooglePdf(e.Message.Chat.Id, "Упражнение «Слова силы».pdf", name);
-                    name = "exercises";
-                    await SendGooglePdf(e.Message.Chat.Id, "Упражнения ННО.pdf", name);
-                    name = "feelings";
-                    await SendGooglePdf(e.Message.Chat.Id, "Перечень чувств.pdf", name);
-                    name = "needs";
-                    await SendGooglePdf(e.Message.Chat.Id, "Перечень нужд.pdf", name);
+                    foreach (DocumentInfo info in _infos)
+                    {
+                        await SendGooglePdf(e.Message.Chat.Id, info);
+                    }
                     break;
             }
         }
 
-        private async Task SendGooglePdf(long chatId, string fileName, IEnumerable<string> names)
+        private async Task SendGooglePdf(long chatId, string fileName, IEnumerable<DocumentInfo> infos)
         {
             await Bot.SendChatActionAsync(chatId, ChatAction.UploadDocument);
 
-            IEnumerable<DocumentRequest> requests =
-                names.Select(n => new DocumentRequest(_sources[n], 1));
+            IEnumerable<DocumentRequest> requests = infos.Select(info => new DocumentRequest(info, 1));
 
             string path = Path.GetTempFileName();
             _googleDataManager.Unify(requests, path, false);
@@ -102,16 +68,26 @@ namespace MoscowNvcBot.Console
             await SendFile(chatId, fileName, path);
         }
 
-        private async Task SendGooglePdf(long chatId, string fileName, string name)
+        private async Task SendGooglePdf(long chatId, DocumentInfo info)
         {
             await Bot.SendChatActionAsync(chatId, ChatAction.UploadDocument);
 
-            var request = new DocumentRequest(_sources[name], 1);
+            var request = new DocumentRequest(info, 1);
 
             string path = Path.GetTempFileName();
             _googleDataManager.Copy(request, path, false);
 
+            string fileName = GetName(info);
+
             await SendFile(chatId, fileName, path);
+        }
+
+        private string GetName(DocumentInfo info)
+        {
+            string name = _googleDataManager.GetName(info.Id);
+            name = name.Replace("«", "");
+            name = name.Replace("»", "");
+            return $"{name}.pdf";
         }
 
         private async Task SendFile(long chatId, string fileName, string path)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using GoogleDocumentsUnifier.Logic;
@@ -18,29 +19,13 @@ namespace MoscowNvcBot.Console
                 return;
             }
 
-            string[] names =
-            {
-                "checklist",
-                "landing",
-                "case_manual",
-                "case_template",
-                "empathy_manual",
-                "conflict_manual",
-                "refusals_manual",
-                "power_words_manual",
-                "exercises",
-                "feelings",
-                "needs"
-            };
-
-            Dictionary<string, DocumentInfo> sources =
-                names.ToDictionary(n => n,
-                                   n => new DocumentInfo(ConfigurationManager.AppSettings.Get(n),
-                                                         DocumentType.GoogleDocument));
+            string sourcesSetting = ConfigurationManager.AppSettings.Get("sources");
+            string[] sources = sourcesSetting.Split(new [] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+            List<DocumentInfo> infos = sources.Select(CreateInfo).ToList();
 
             using (var googleDataManager = new DataManager(clientSecretPath))
             {
-                var botLogic = new MoscowNvcBotLogic(token, sources, googleDataManager);
+                var botLogic = new MoscowNvcBotLogic(token, infos, googleDataManager);
 
                 User me = botLogic.Bot.GetMeAsync().Result;
                 System.Console.Title = me.Username;
@@ -50,6 +35,12 @@ namespace MoscowNvcBot.Console
                 System.Console.ReadLine();
                 botLogic.Bot.StopReceiving();
             }
+        }
+
+        private static DocumentInfo CreateInfo(string source)
+        {
+            string id = new string(source.Where(c => !char.IsWhiteSpace(c)).ToArray());
+            return new DocumentInfo(id, DocumentType.GoogleDocument);
         }
     }
 }
