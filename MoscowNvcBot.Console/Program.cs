@@ -40,7 +40,7 @@ namespace MoscowNvcBot.Console
 
             using (var googleDataManager = new DataManager(clientSecretPath))
             {
-                var botLogic = new MoscowNvcBotLogc(token, sources, googleDataManager);
+                var botLogic = new MoscowNvcBotLogic(token, sources, googleDataManager);
 
                 User me = botLogic.Bot.GetMeAsync().Result;
                 System.Console.Title = me.Username;

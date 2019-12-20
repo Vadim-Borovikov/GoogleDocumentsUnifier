@@ -12,7 +12,7 @@ using File = System.IO.File;
 
 namespace MoscowNvcBot.Console
 {
-    internal class MoscowNvcBotLogc
+    internal class MoscowNvcBotLogic
     {
         public readonly TelegramBotClient Bot;
 
@@ -20,7 +20,7 @@ namespace MoscowNvcBot.Console
 
         private readonly Dictionary<string, DocumentInfo> _sources;
 
-        public MoscowNvcBotLogc(string token, Dictionary<string, DocumentInfo> sources,
+        public MoscowNvcBotLogic(string token, Dictionary<string, DocumentInfo> sources,
                                 DataManager googleDataManager)
         {
             _googleDataManager = googleDataManager;
