@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using GoogleDocumentsUnifier.Logic;
@@ -19,9 +18,8 @@ namespace MoscowNvcBot.Console
                 return;
             }
 
-            string sourcesSetting = ConfigurationManager.AppSettings.Get("sources");
-            string[] sources = sourcesSetting.Split(new [] { ";" }, StringSplitOptions.RemoveEmptyEntries);
-            List<DocumentInfo> infos = sources.Select(CreateInfo).ToList();
+            string[] sources = GetArraySetting("sources");
+            List<DocumentInfo> infos = sources.Select(CreateGoogleDocumentInfo).ToList();
 
             using (var googleDataManager = new DataManager(clientSecretPath))
             {
@@ -37,11 +35,22 @@ namespace MoscowNvcBot.Console
             }
         }
 
-        private static DocumentInfo CreateInfo(string source)
+        private static string[] GetArraySetting(string name)
         {
-            string id = new string(source.Where(c => !char.IsWhiteSpace(c)).ToArray());
+            string setting = ConfigurationManager.AppSettings.Get(name);
+            char[] separator = { ';' };
+            string[] array = setting.Split(separator);
+            return array.Select(RemoveWhiteSpace).ToArray();
+        }
+
+        private static string RemoveWhiteSpace(string s)
+        {
+            return new string(s.Where(c => !char.IsWhiteSpace(c)).ToArray());
+        }
+
+        private static DocumentInfo CreateGoogleDocumentInfo(string id)
+        {
             return new DocumentInfo(id, DocumentType.GoogleDocument);
         }
     }
 }
-    
