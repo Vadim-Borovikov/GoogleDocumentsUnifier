@@ -11,11 +11,11 @@ namespace MoscowNvcBot.Console
     {
         private static void Main(string[] args)
         {
-            string clientSecretPath = ConfigurationManager.AppSettings.Get("googleClientSecretPath");
+            string googleClientSecretPath = ConfigurationManager.AppSettings.Get("googleClientSecretPath");
 
             string tokenPath = ConfigurationManager.AppSettings.Get("telegramTokenPath");
-            string token = File.ReadAllText(tokenPath);
-            if (string.IsNullOrWhiteSpace(token))
+            string telegramToken = File.ReadAllText(tokenPath);
+            if (string.IsNullOrWhiteSpace(telegramToken))
             {
                 return;
             }
@@ -23,9 +23,9 @@ namespace MoscowNvcBot.Console
             string[] sources = GetArraySetting("sources");
             List<DocumentInfo> infos = sources.Select(CreateGoogleDocumentInfo).ToList();
 
-            using (var googleDataManager = new DataManager(clientSecretPath))
+            using (var googleDataManager = new DataManager(googleClientSecretPath))
             {
-                var botLogic = new MoscowNvcBotLogic(token, infos, googleDataManager);
+                var botLogic = new MoscowNvcBotLogic(telegramToken, infos, googleDataManager);
 
                 User me = botLogic.Bot.GetMeAsync().Result;
                 System.Console.Title = me.Username;
