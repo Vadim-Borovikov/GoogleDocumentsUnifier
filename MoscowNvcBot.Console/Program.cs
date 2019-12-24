@@ -12,11 +12,22 @@ namespace MoscowNvcBot.Console
         private static void Main(string[] args)
         {
             string googleClientSecretPath = ConfigurationManager.AppSettings.Get("googleClientSecretPath");
+            if (!File.Exists(googleClientSecretPath))
+            {
+                System.Console.WriteLine($"No {googleClientSecretPath} found!");
+                return;
+            }
 
             string tokenPath = ConfigurationManager.AppSettings.Get("telegramTokenPath");
+            if (!File.Exists(tokenPath))
+            {
+                System.Console.WriteLine($"No {tokenPath} found!");
+                return;
+            }
             string telegramToken = File.ReadAllText(tokenPath);
             if (string.IsNullOrWhiteSpace(telegramToken))
             {
+                System.Console.WriteLine($"Token in {tokenPath} in empty!");
                 return;
             }
 
