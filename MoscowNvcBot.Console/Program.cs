@@ -42,7 +42,12 @@ namespace MoscowNvcBot.Console
             string setting = ConfigurationManager.AppSettings.Get(name);
             char[] separator = { ';' };
             string[] array = setting.Split(separator);
-            return array.Select(RemoveWhiteSpace).ToArray();
+            return RemoveWhiteSpace(array).ToArray();
+        }
+
+        private static IEnumerable<string> RemoveWhiteSpace(IEnumerable<string> strings)
+        {
+            return strings.Select(RemoveWhiteSpace).Where(s => !string.IsNullOrWhiteSpace(s));
         }
 
         private static string RemoveWhiteSpace(string s)
