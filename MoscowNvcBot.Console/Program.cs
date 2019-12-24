@@ -9,34 +9,54 @@ namespace MoscowNvcBot.Console
 {
     internal static class Program
     {
+        private static string _googleClientSecretPath;
+        private static string _telegramToken;
+        private static List<DocumentInfo> _infos;
+
         private static void Main(string[] args)
         {
-            string googleClientSecretPath = ConfigurationManager.AppSettings.Get("googleClientSecretPath");
-            if (!File.Exists(googleClientSecretPath))
+            bool success = LoadConfig();
+            if (!success)
             {
-                System.Console.WriteLine($"No {googleClientSecretPath} found!");
                 return;
+            }
+
+            SetupBot();
+        }
+
+        private static bool LoadConfig()
+        {
+            _googleClientSecretPath = ConfigurationManager.AppSettings.Get("googleClientSecretPath");
+            if (!File.Exists(_googleClientSecretPath))
+            {
+                System.Console.WriteLine($"No {_googleClientSecretPath} found!");
+                return false;
             }
 
             string tokenPath = ConfigurationManager.AppSettings.Get("telegramTokenPath");
             if (!File.Exists(tokenPath))
             {
                 System.Console.WriteLine($"No {tokenPath} found!");
-                return;
+                return false;
             }
-            string telegramToken = File.ReadAllText(tokenPath);
-            if (string.IsNullOrWhiteSpace(telegramToken))
+            _telegramToken = File.ReadAllText(tokenPath);
+            if (string.IsNullOrWhiteSpace(_telegramToken))
             {
                 System.Console.WriteLine($"Token in {tokenPath} in empty!");
-                return;
+                return false;
             }
 
             string[] sources = GetArraySetting("sources");
-            List<DocumentInfo> infos = sources.Select(CreateGoogleDocumentInfo).ToList();
+            _infos = sources.Select(CreateGoogleDocumentInfo).ToList();
 
-            using (var googleDataManager = new DataManager(googleClientSecretPath))
+            return true;
+        }
+
+        private static void SetupBot()
+        {
+            using (var googleDataManager = new DataManager(_googleClientSecretPath))
             {
-                var botLogic = new MoscowNvcBotLogic(telegramToken, infos, googleDataManager);
+                var botLogic = new MoscowNvcBotLogic(_telegramToken, _infos, googleDataManager);
 
                 User me = botLogic.Bot.GetMeAsync().Result;
                 System.Console.Title = me.Username;
