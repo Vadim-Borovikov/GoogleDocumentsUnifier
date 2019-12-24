@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Linq;
 using GoogleDocumentsUnifier.Logic;
 using Telegram.Bot.Types;
+using File = System.IO.File;
 
 namespace MoscowNvcBot.Console
 {
@@ -12,7 +13,8 @@ namespace MoscowNvcBot.Console
         {
             string clientSecretPath = ConfigurationManager.AppSettings.Get("clientSecretPath");
 
-            string token = ConfigurationManager.AppSettings.Get("token");
+            string tokenPath = ConfigurationManager.AppSettings.Get("tokenPath");
+            string token = File.ReadAllText(tokenPath);
             if (string.IsNullOrWhiteSpace(token))
             {
                 return;
