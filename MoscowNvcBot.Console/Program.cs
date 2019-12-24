@@ -11,9 +11,9 @@ namespace MoscowNvcBot.Console
     {
         private static void Main(string[] args)
         {
-            string clientSecretPath = ConfigurationManager.AppSettings.Get("clientSecretPath");
+            string clientSecretPath = ConfigurationManager.AppSettings.Get("googleClientSecretPath");
 
-            string tokenPath = ConfigurationManager.AppSettings.Get("tokenPath");
+            string tokenPath = ConfigurationManager.AppSettings.Get("telegramTokenPath");
             string token = File.ReadAllText(tokenPath);
             if (string.IsNullOrWhiteSpace(token))
             {
