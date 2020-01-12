@@ -27,10 +27,10 @@ namespace MoscowNvcBot.Console
             _infos = infos;
 
             Bot = new TelegramBotClient(token);
-            Bot.OnMessage += OnMessageReceived;
+            Bot.OnMessage += OnMessageReceivedAsync;
         }
 
-        private async void OnMessageReceived(object sender, MessageEventArgs e)
+        private async void OnMessageReceivedAsync(object sender, MessageEventArgs e)
         {
             if (e.Message.Type != MessageType.Text)
             {
@@ -42,21 +42,21 @@ namespace MoscowNvcBot.Console
             switch (e.Message.Text)
             {
                 case "/start":
-                    await ShowOptions(e.Message.Chat.Id);
+                    await ShowOptionsAsync(e.Message.Chat.Id);
                     break;
                 case "Все раздатки вместе":
-                    await SendGooglePdf(e.Message.Chat.Id, "Все раздатки вместе.pdf", _infos);
+                    await SendGooglePdfAsync(e.Message.Chat.Id, "Все раздатки вместе.pdf", _infos);
                     break;
                 case "Все раздатки по отдельности":
                     foreach (DocumentInfo info in _infos)
                     {
-                        await SendGooglePdf(e.Message.Chat.Id, info);
+                        await SendGooglePdfAsync(e.Message.Chat.Id, info);
                     }
                     break;
             }
         }
 
-        private async Task SendGooglePdf(long chatId, string fileName, IEnumerable<DocumentInfo> infos)
+        private async Task SendGooglePdfAsync(long chatId, string fileName, IEnumerable<DocumentInfo> infos)
         {
             await Bot.SendChatActionAsync(chatId, ChatAction.UploadDocument);
 
@@ -65,10 +65,10 @@ namespace MoscowNvcBot.Console
             string path = Path.GetTempFileName();
             _googleDataManager.Unify(requests, path, false);
 
-            await SendFile(chatId, fileName, path);
+            await SendFileAsync(chatId, fileName, path);
         }
 
-        private async Task SendGooglePdf(long chatId, DocumentInfo info)
+        private async Task SendGooglePdfAsync(long chatId, DocumentInfo info)
         {
             await Bot.SendChatActionAsync(chatId, ChatAction.UploadDocument);
 
@@ -79,7 +79,7 @@ namespace MoscowNvcBot.Console
 
             string fileName = GetName(info);
 
-            await SendFile(chatId, fileName, path);
+            await SendFileAsync(chatId, fileName, path);
         }
 
         private string GetName(DocumentInfo info)
@@ -90,7 +90,7 @@ namespace MoscowNvcBot.Console
             return $"{name}.pdf";
         }
 
-        private async Task SendFile(long chatId, string fileName, string path)
+        private async Task SendFileAsync(long chatId, string fileName, string path)
         {
             using (var fileStream = new FileStream(path, FileMode.Open))
             {
@@ -100,7 +100,7 @@ namespace MoscowNvcBot.Console
             File.Delete(path);
         }
 
-        private async Task ShowOptions(long chatId)
+        private async Task ShowOptionsAsync(long chatId)
         {
             var replyKeyboard = new ReplyKeyboardMarkup(new[]
             {
