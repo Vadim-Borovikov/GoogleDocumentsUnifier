@@ -2615,7 +2615,6 @@ input[type="search"] {
   box-sizing: border-box;
   -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
 }
 input[type="radio"],
 input[type="checkbox"] {
@@ -5939,7 +5938,6 @@ button.close {
   border: 0;
   -webkit-appearance: none;
   -moz-appearance: none;
-  appearance: none;
 }
 .modal-open {
   overflow: hidden;

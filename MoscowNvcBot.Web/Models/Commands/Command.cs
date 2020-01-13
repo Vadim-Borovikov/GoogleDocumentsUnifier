@@ -1,15 +1,16 @@
 ﻿using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
-    public abstract class Command
+    internal abstract class Command
     {
-        public abstract string Name { get; }
+        protected abstract string Name { get; }
 
-        public abstract Task Execute(Message message, TelegramBotClient client);
+        internal bool Contains(Message message) => (message.Type == MessageType.Text) && message.Text.Contains(Name);
 
-        public abstract bool Contains(Message message);
+        internal abstract Task Execute(Message message, TelegramBotClient client);
     }
 }

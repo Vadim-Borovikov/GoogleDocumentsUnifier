@@ -4,22 +4,16 @@ using Telegram.Bot.Types;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
-    public class StartCommand : Command
+    internal class StartCommand : Command
     {
-        public override string Name => @"/start";
+        protected override string Name => "start";
 
-        public override bool Contains(Message message)
+        internal override async Task Execute(Message message, TelegramBotClient botClient)
         {
-            if (message.Type != Telegram.Bot.Types.Enums.MessageType.Text)
-                return false;
+            long chatId = message.Chat.Id;
+            int messageId = message.MessageId;
 
-            return message.Text.Contains(this.Name);
-        }
-
-        public override async Task Execute(Message message, TelegramBotClient botClient)
-        {
-            var chatId = message.Chat.Id;
-            await botClient.SendTextMessageAsync(chatId, "Hallo I'm ASP.NET Core Bot", parseMode: Telegram.Bot.Types.Enums.ParseMode.Markdown);
+            await botClient.SendTextMessageAsync(chatId, "Hello!", replyToMessageId: messageId);
         }
     }
 }

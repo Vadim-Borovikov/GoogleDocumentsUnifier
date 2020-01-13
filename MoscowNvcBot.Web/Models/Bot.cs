@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MoscowNvcBot.Web.Models.Commands;
@@ -6,27 +5,32 @@ using Telegram.Bot;
 
 namespace MoscowNvcBot.Web.Models
 {
-    public class Bot
+    internal static class Bot
     {
-        private static TelegramBotClient botClient;
-        private static List<Command> commandsList;
+        private static TelegramBotClient _client;
 
-        public static IReadOnlyList<Command> Commands => commandsList.AsReadOnly();
+        internal static IReadOnlyList<Command> Commands { get; private set; }
 
-        public static async Task<TelegramBotClient> GetBotClientAsync()
+        internal static async Task<TelegramBotClient> GetBotClientAsync()
         {
-            if (botClient != null)
+            if (_client == null)
             {
-                return botClient;
+                await Initialize();
             }
 
-            commandsList = new List<Command> {new StartCommand()};
-            //TODO: Add more commands
+            return _client;
+        }
 
-            botClient = new TelegramBotClient(AppSettings.Key);
-            string hook = string.Format(AppSettings.Url, "api/message/update");
-            await botClient.SetWebhookAsync(hook);
-            return botClient;
+        private static async Task Initialize()
+        {
+            var commands = new List<Command>
+            {
+                new StartCommand()
+            };
+            Commands = commands.AsReadOnly();
+
+            _client = new TelegramBotClient(AppSettings.Key);
+            await _client.SetWebhookAsync(AppSettings.Url);
         }
     }
 }

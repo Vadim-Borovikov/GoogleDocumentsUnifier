@@ -1,11 +1,15 @@
-using System;
-
 namespace MoscowNvcBot.Web.Models
 {
-    public static class AppSettings
+    internal static class AppSettings
     {
-        public static string Url { get; set; } = "https://moscownvcbot.azurewebsites.net:443/{0}";
-        public static string Name { get; set; } = "moscow_nvc_bot";
-        public static string Key { get; set; } = "";
+        private const string UrlBase = "https://moscownvcbot.azurewebsites.net";
+
+        private const int Port = 443;
+
+        public const string Route = "api/message/update";
+
+        public static readonly string Url = $"{UrlBase}:{Port}/{Route}";
+
+        public const string Key = "";
     }
 }
