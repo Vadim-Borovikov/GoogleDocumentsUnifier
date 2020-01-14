@@ -8,7 +8,7 @@ using Telegram.Bot.Types;
 
 namespace MoscowNvcBot.Web.Controllers
 {
-    [Route(AppSettings.Route)]
+    [Route(Configuration.Route)]
     public class UpdateController : Controller
     {
         // GET api/values

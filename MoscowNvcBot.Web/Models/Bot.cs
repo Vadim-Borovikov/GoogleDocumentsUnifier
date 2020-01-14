@@ -29,8 +29,8 @@ namespace MoscowNvcBot.Web.Models
             };
             Commands = commands.AsReadOnly();
 
-            _client = new TelegramBotClient(AppSettings.Key);
-            await _client.SetWebhookAsync(AppSettings.Url);
+            _client = new TelegramBotClient(Configuration.Token);
+            await _client.SetWebhookAsync(Configuration.Url);
         }
     }
 }
