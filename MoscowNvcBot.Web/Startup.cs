@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MoscowNvcBot.Web.Models;
 using MoscowNvcBot.Web.Models.Services;
 
 namespace MoscowNvcBot.Web
@@ -21,6 +22,7 @@ namespace MoscowNvcBot.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IBotService, BotService>();
+            services.Configure<BotConfiguration>(Configuration.GetSection("BotConfiguration"));
 
             services.Configure<CookiePolicyOptions>(options =>
             {
