@@ -22,7 +22,7 @@ namespace MoscowNvcBot.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IBotService, BotService>();
-            services.Configure<BotConfiguration>(Configuration.GetSection("BotConfiguration"));
+            services.Configure<BotConfiguration>(Configuration);
 
             services.Configure<CookiePolicyOptions>(options =>
             {
