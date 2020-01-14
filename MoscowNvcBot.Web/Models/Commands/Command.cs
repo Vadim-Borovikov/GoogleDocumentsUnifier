@@ -7,7 +7,8 @@ namespace MoscowNvcBot.Web.Models.Commands
 {
     public abstract class Command
     {
-        protected abstract string Name { get; }
+        internal abstract string Name { get; }
+        internal abstract string Description { get; }
 
         internal bool Contains(Message message) => (message.Type == MessageType.Text) && message.Text.Contains(Name);
 

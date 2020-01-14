@@ -17,11 +17,12 @@ namespace MoscowNvcBot.Web.Models.Services
             Client = new TelegramBotClient(config.Token);
             Client.SetWebhookAsync(config.Url).Wait();
 
-            var commands = new List<Command>
-            {
-                new StartCommand()
-            };
+            var commands = new List<Command>();
+
             Commands = commands.AsReadOnly();
+            var startCommand = new StartCommand(config.StartMessagePrefix, Commands);
+
+            commands.Add(startCommand);
         }
     }
 }
