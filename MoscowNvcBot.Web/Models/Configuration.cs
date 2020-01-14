@@ -6,7 +6,7 @@ namespace MoscowNvcBot.Web.Models
 
         private const int Port = 443;
 
-        public const string Route = "api/message/update";
+        public const string Route = "api/update";
 
         public static readonly string Url = $"{Host}:{Port}/{Route}";
 
