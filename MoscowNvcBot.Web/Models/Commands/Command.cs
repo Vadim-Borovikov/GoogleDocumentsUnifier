@@ -5,7 +5,7 @@ using Telegram.Bot.Types.Enums;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
-    internal abstract class Command
+    public abstract class Command
     {
         protected abstract string Name { get; }
 

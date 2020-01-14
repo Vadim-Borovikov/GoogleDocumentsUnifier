@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MoscowNvcBot.Web.Models;
+using MoscowNvcBot.Web.Models.Services;
 
 namespace MoscowNvcBot.Web
 {
@@ -20,6 +20,8 @@ namespace MoscowNvcBot.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IBotService, BotService>();
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -54,8 +56,6 @@ namespace MoscowNvcBot.Web
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
-            Bot.GetBotClientAsync().Wait();
         }
     }
 }

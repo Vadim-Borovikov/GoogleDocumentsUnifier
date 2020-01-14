@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MoscowNvcBot.Web.Models;
 using MoscowNvcBot.Web.Models.Commands;
-using Telegram.Bot;
+using MoscowNvcBot.Web.Models.Services;
 using Telegram.Bot.Types;
 
 namespace MoscowNvcBot.Web.Controllers
@@ -11,6 +11,10 @@ namespace MoscowNvcBot.Web.Controllers
     [Route(Configuration.Route)]
     public class UpdateController : Controller
     {
+        private readonly IBotService _botService;
+
+        public UpdateController(IBotService botService) { _botService = botService; }
+
         // GET api/values
         [HttpGet]
         public string Get() => "Method GET unuvalable";
@@ -22,12 +26,11 @@ namespace MoscowNvcBot.Web.Controllers
             if (update != null)
             {
                 Message message = update.Message;
-                TelegramBotClient client = await Bot.GetBotClientAsync();
 
-                Command command = Bot.Commands.FirstOrDefault(c => c.Contains(message));
+                Command command = _botService.Commands.FirstOrDefault(c => c.Contains(message));
                 if (command != null)
                 {
-                    await command.Execute(message, client);
+                    await command.Execute(message, _botService.Client);
                 }
             }
 
