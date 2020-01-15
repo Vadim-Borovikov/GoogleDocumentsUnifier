@@ -19,37 +19,40 @@ namespace GoogleDocumentsUnifier.Logic
 
         public string GetName(string id) => _provider.GetName(id);
 
-        public void Copy(DocumentRequest request, string resultPath, bool makeEvens)
+        public void Copy(DocumentRequest request, string resultPath)
         {
             using (var result = new Pdf())
             {
-                Import(request, result, makeEvens);
+                Import(request, result);
 
                 result.Save(resultPath);
             }
         }
 
-        public void Unify(IEnumerable<DocumentRequest> requests, string resultPath, bool makeEvens)
+        public void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
         {
             using (var result = new Pdf())
             {
                 foreach (DocumentRequest request in requests)
                 {
-                    Import(request, result, makeEvens);
+                    Import(request, result);
                 }
 
                 result.Save(resultPath);
             }
         }
 
-        private void Import(DocumentRequest request, Pdf result, bool makeEvens)
+        private void Import(DocumentRequest request, Pdf result)
         {
             using (var stream = new MemoryStream())
             {
                 SetupStream(stream, request.Info);
                 using (var pdf = new Pdf(stream))
                 {
-                    Import(pdf, result, request.Amount, makeEvens);
+                    for (uint i = 0; i < request.Amount; ++i)
+                    {
+                        result.AddAllPages(pdf);
+                    }
                 }
             }
         }
@@ -79,27 +82,6 @@ namespace GoogleDocumentsUnifier.Logic
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(info.DocumentType));
-            }
-        }
-
-        private static void Import(Pdf source, Pdf target, uint amount, bool makeEvens)
-        {
-            if (makeEvens)
-            {
-                MakePdfPagesCountEven(source);
-            }
-
-            for (uint i = 0; i < amount; ++i)
-            {
-                target.AddAllPages(source);
-            }
-        }
-
-        private static void MakePdfPagesCountEven(Pdf pdf)
-        {
-            if ((pdf.PagesAmount % 2) != 0)
-            {
-                pdf.AddEmptyPage();
             }
         }
 

@@ -21,8 +21,9 @@ namespace GoogleDocumentsUnifier
         {
             InitializeComponent();
 
-            string clientSecretPath = ConfigurationManager.AppSettings.Get("clientSecretPath");
-            _dataManager = new DataManager(clientSecretPath);
+            string projectPath = ConfigurationManager.AppSettings.Get("projectPath");
+            string projectJson = File.ReadAllText(projectPath);
+            _dataManager = new DataManager(projectJson);
             _amounts = new Dictionary<DocumentInfo, NumericUpDown>();
 
             var section = (SourcesConfigSection)ConfigurationManager.GetSection("SourcesSection");
@@ -50,7 +51,7 @@ namespace GoogleDocumentsUnifier
 
             var numericUpDown = new NumericUpDown
             {
-                Value = 5,
+                Value = 20,
                 Width = 40,
                 Height = 28
             };
@@ -90,8 +91,7 @@ namespace GoogleDocumentsUnifier
             List<DocumentRequest> requests =
                 _amounts.Select(p => new DocumentRequest(p.Key, DoubleToUint(p.Value.Value))).ToList();
             string path = PathTextBox.Text.Replace('/', '\\');
-            bool makeEvens = DoubleSideCheckBox.IsChecked.HasValue && DoubleSideCheckBox.IsChecked.Value;
-            await Task.Run(() => _dataManager.Unify(requests, path, makeEvens));
+            await Task.Run(() => _dataManager.Unify(requests, path));
 
             ShowFile(path);
             Close();

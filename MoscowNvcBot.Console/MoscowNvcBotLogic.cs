@@ -125,7 +125,7 @@ namespace MoscowNvcBot.Console
             IEnumerable<DocumentRequest> requests = _infos.Select(info => new DocumentRequest(info, 1));
 
             string path = Path.GetTempFileName();
-            _googleDataManager.Unify(requests, path, false);
+            _googleDataManager.Unify(requests, path);
 
             return path;
         }
@@ -154,7 +154,7 @@ namespace MoscowNvcBot.Console
             var request = new DocumentRequest(info);
 
             string path = Path.GetTempFileName();
-            _googleDataManager.Copy(request, path, false);
+            _googleDataManager.Copy(request, path);
 
             return path;
         }

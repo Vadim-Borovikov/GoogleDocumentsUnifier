@@ -18,7 +18,7 @@ namespace GoogleDocumentsUnifier.LogicTests
                 {
                     new DocumentRequest(pdf)
                 };
-                dataManager.Unify(requests, OutputTempPath, false);
+                dataManager.Unify(requests, OutputTempPath);
             }
         }
 
