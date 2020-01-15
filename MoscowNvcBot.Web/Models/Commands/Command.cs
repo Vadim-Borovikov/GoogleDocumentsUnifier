@@ -12,6 +12,6 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal bool Contains(Message message) => (message.Type == MessageType.Text) && message.Text.Contains(Name);
 
-        internal abstract Task Execute(Message message, TelegramBotClient client);
+        internal abstract Task Execute(Message message, ITelegramBotClient client);
     }
 }

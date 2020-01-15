@@ -20,7 +20,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             _commands = commands;
         }
 
-        internal override async Task Execute(Message message, TelegramBotClient botClient)
+        internal override async Task Execute(Message message, ITelegramBotClient botClient)
         {
             var builder = new StringBuilder(_startMessagePrefix);
             foreach (Command command in _commands)
@@ -28,7 +28,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 builder.AppendLine($"/{command.Name} – {command.Description}\n");
             }
 
-            await botClient.SendTextMessageAsync(message.Chat.Id, builder.ToString());
+            await botClient.SendTextMessageAsync(message.Chat, builder.ToString());
         }
     }
 }
