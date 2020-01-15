@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Threading;
+﻿using System.IO;
 using GoogleDocumentsUnifier.Logic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -41,10 +39,8 @@ namespace GoogleDocumentsUnifier.LogicTests
 
         private static GoogleApisDriveProvider CreateProvider()
         {
-            using (var stream = new FileStream("Keys/project.json", FileMode.Open, FileAccess.Read))
-            {
-                return new GoogleApisDriveProvider(stream);
-            }
+            string projectJson = File.ReadAllText("Keys/project.json");
+            return new GoogleApisDriveProvider(projectJson);
         }
 
         private const string PdfId = "17hnk4p5kIS8U4vK5JB18B59WMy-dEVvk";

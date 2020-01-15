@@ -9,10 +9,7 @@ namespace GoogleDocumentsUnifier.Logic
     {
         public DataManager(string projectJson)
         {
-            using (var stream = new FileStream(projectJson, FileMode.Open, FileAccess.Read))
-            {
-                _provider = new GoogleApisDriveProvider(stream);
-            }
+            _provider = new GoogleApisDriveProvider(projectJson);
         }
 
         public void Dispose()

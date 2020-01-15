@@ -9,7 +9,7 @@ namespace MoscowNvcBot.Console
 {
     internal static class Program
     {
-        private static string _googleProjectPath;
+        private static string _googleProjectJson;
         private static string _telegramToken;
         private static List<DocumentInfo> _infos;
 
@@ -26,12 +26,13 @@ namespace MoscowNvcBot.Console
 
         private static bool LoadConfig()
         {
-            _googleProjectPath = ConfigurationManager.AppSettings.Get("googleProjectPath");
-            if (!File.Exists(_googleProjectPath))
+            string googleProjectPath = ConfigurationManager.AppSettings.Get("googleProjectPath");
+            if (!File.Exists(googleProjectPath))
             {
-                System.Console.WriteLine($"No {_googleProjectPath} found!");
+                System.Console.WriteLine($"No {googleProjectPath} found!");
                 return false;
             }
+            _googleProjectJson = File.ReadAllText(googleProjectPath);
 
             string tokenPath = ConfigurationManager.AppSettings.Get("telegramTokenPath");
             if (!File.Exists(tokenPath))
@@ -54,7 +55,7 @@ namespace MoscowNvcBot.Console
 
         private static void SetupBot()
         {
-            using (var googleDataManager = new DataManager(_googleProjectPath))
+            using (var googleDataManager = new DataManager(_googleProjectJson))
             {
                 var botLogic = new MoscowNvcBotLogic(_telegramToken, _infos, googleDataManager);
 

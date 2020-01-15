@@ -13,9 +13,9 @@ namespace GoogleDocumentsUnifier.Logic
         private static readonly string[] Scopes = { DriveService.Scope.DriveReadonly };
         private const string ApplicationName = "GoogleApisDriveProvider";
 
-        public GoogleApisDriveProvider(Stream projectStream)
+        public GoogleApisDriveProvider(string projectJson)
         {
-            GoogleCredential credential = GoogleCredential.FromStream(projectStream).CreateScoped(Scopes);
+            GoogleCredential credential = GoogleCredential.FromJson(projectJson).CreateScoped(Scopes);
 
             var initializer = new BaseClientService.Initializer
             {

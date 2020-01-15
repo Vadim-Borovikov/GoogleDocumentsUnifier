@@ -1,4 +1,5 @@
-﻿using GoogleDocumentsUnifier.Logic;
+﻿using System.IO;
+using GoogleDocumentsUnifier.Logic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoogleDocumentsUnifier.LogicTests
@@ -9,7 +10,8 @@ namespace GoogleDocumentsUnifier.LogicTests
         [TestMethod]
         public void UnifyTest()
         {
-            using (var dataManager = new DataManager("Keys/project.json"))
+            string projectJson = File.ReadAllText("Keys/project.json");
+            using (var dataManager = new DataManager(projectJson))
             {
                 var pdf = new DocumentInfo(InputPdfPath, DocumentType.LocalPdf);
                 var requests = new[]
