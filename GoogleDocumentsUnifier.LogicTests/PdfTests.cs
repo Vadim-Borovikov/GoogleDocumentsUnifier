@@ -19,8 +19,8 @@ namespace GoogleDocumentsUnifier.LogicTests
         [TestMethod]
         public void PdfDocumentStreamTest()
         {
-            PdfDocumentStreamTest(InputPdfPath);
-            PdfDocumentStreamTest(InputDocPath);
+            PdfDocumentStreamTest(InputPdfPath, 13);
+            PdfDocumentStreamTest(InputDocPath, 1);
         }
 
         [TestMethod]
@@ -43,22 +43,24 @@ namespace GoogleDocumentsUnifier.LogicTests
             {
                 using (var stream = new FileStream(InputPdfPath, FileMode.Open))
                 {
-                    var other = new Pdf(stream);
-                    pdf.AddAllPages(other);
+                    using (var other = new Pdf(stream))
+                    {
+                        pdf.AddAllPages(other);
+                        Assert.IsNotNull(pdf);
+                        Assert.AreEqual(13, pdf.PagesAmount);
+                    }
                 }
-                Assert.IsNotNull(pdf);
-                Assert.AreEqual(2, pdf.PagesAmount);
             }
         }
 
-        private static void PdfDocumentStreamTest(string path)
+        private static void PdfDocumentStreamTest(string path, int pagesExpected)
         {
             using (var stream = new FileStream(path, FileMode.Open))
             {
                 using (var pdf = new Pdf(stream))
                 {
                     Assert.IsNotNull(pdf);
-                    Assert.AreEqual(2, pdf.PagesAmount);
+                    Assert.AreEqual(pagesExpected, pdf.PagesAmount);
                 }
             }
         }

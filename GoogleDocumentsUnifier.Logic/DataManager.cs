@@ -2,22 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using System.Threading;
 
 namespace GoogleDocumentsUnifier.Logic
 {
     public class DataManager : IDisposable
     {
-        public DataManager(string clientSecretJson)
+        public DataManager(string projectJson)
         {
-            using (var stream = new FileStream(clientSecretJson, FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream(projectJson, FileMode.Open, FileAccess.Read))
             {
-                string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                string credentialPath = Path.Combine(folderPath, ".credentials/drive-dotnet-quickstart.json");
-
-                _provider = new GoogleApisDriveProvider(stream, credentialPath, "user", CancellationToken.None);
+                _provider = new GoogleApisDriveProvider(stream);
             }
-
         }
 
         public void Dispose()

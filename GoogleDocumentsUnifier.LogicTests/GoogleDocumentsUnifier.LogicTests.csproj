@@ -64,6 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Keys\project.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

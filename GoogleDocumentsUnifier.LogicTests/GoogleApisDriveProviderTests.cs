@@ -41,16 +41,13 @@ namespace GoogleDocumentsUnifier.LogicTests
 
         private static GoogleApisDriveProvider CreateProvider()
         {
-            using (var stream = new FileStream("client_secret.json", FileMode.Open, FileAccess.Read))
+            using (var stream = new FileStream("Keys/project.json", FileMode.Open, FileAccess.Read))
             {
-                string folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                string credentialPath = Path.Combine(folderPath, ".credentials/drive-dotnet-quickstart.json");
-
-                return new GoogleApisDriveProvider(stream, credentialPath, "user", CancellationToken.None);
+                return new GoogleApisDriveProvider(stream);
             }
         }
 
-        private const string PdfId = "0B3eXnAACJCqlWmlvWExrQjcyZFE";
-        private const string DocId = "1lobinc-AwI3TEV9civH4_GyTPvIaZ5aBCGTspj67eNQ";
+        private const string PdfId = "17hnk4p5kIS8U4vK5JB18B59WMy-dEVvk";
+        private const string DocId = "1WxXjtQu03JfLR5dhECNWcYX8EyoHUJePDrUocQnsB8g";
     }
 }

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
-using Google.Apis.Util.Store;
 
 namespace GoogleDocumentsUnifier.Logic
 {
@@ -16,20 +13,13 @@ namespace GoogleDocumentsUnifier.Logic
         private static readonly string[] Scopes = { DriveService.Scope.DriveReadonly };
         private const string ApplicationName = "GoogleApisDriveProvider";
 
-        public GoogleApisDriveProvider(Stream clientSecretStream, string credentialPath, string user,
-                                       CancellationToken taskCancellationToken)
+        public GoogleApisDriveProvider(Stream projectStream)
         {
-            GoogleClientSecrets secrets = GoogleClientSecrets.Load(clientSecretStream);
-
-            var credentialDataStore = new FileDataStore(credentialPath, true);
-
-            Task<UserCredential> credentialTask =
-                GoogleWebAuthorizationBroker.AuthorizeAsync(secrets.Secrets, Scopes, user, taskCancellationToken,
-                                                            credentialDataStore);
+            GoogleCredential credential = GoogleCredential.FromStream(projectStream).CreateScoped(Scopes);
 
             var initializer = new BaseClientService.Initializer
             {
-                HttpClientInitializer = credentialTask.Result,
+                HttpClientInitializer = credential,
                 ApplicationName = ApplicationName
             };
 

@@ -9,7 +9,7 @@ namespace GoogleDocumentsUnifier.LogicTests
         [TestMethod]
         public void UnifyTest()
         {
-            using (var dataManager = new DataManager("client_secret.json"))
+            using (var dataManager = new DataManager("Keys/project.json"))
             {
                 var pdf = new DocumentInfo(InputPdfPath, DocumentType.LocalPdf);
                 var requests = new[]
