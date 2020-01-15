@@ -151,7 +151,7 @@ namespace MoscowNvcBot.Console
 
         private string CopyInfo(DocumentInfo info)
         {
-            var request = new DocumentRequest(info, 1);
+            var request = new DocumentRequest(info);
 
             string path = Path.GetTempFileName();
             _googleDataManager.Copy(request, path, false);

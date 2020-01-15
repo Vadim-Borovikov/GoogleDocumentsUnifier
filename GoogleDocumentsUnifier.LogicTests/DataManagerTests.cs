@@ -14,7 +14,7 @@ namespace GoogleDocumentsUnifier.LogicTests
                 var pdf = new DocumentInfo(InputPdfPath, DocumentType.LocalPdf);
                 var requests = new[]
                 {
-                    new DocumentRequest(pdf, 1)
+                    new DocumentRequest(pdf)
                 };
                 dataManager.Unify(requests, OutputTempPath, false);
             }
