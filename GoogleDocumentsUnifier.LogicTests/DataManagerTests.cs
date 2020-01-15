@@ -10,7 +10,7 @@ namespace GoogleDocumentsUnifier.LogicTests
         [TestMethod]
         public void UnifyTest()
         {
-            string projectJson = File.ReadAllText("Keys/project.json");
+            string projectJson = File.ReadAllText(ProjectJsonPath);
             using (var dataManager = new DataManager(projectJson))
             {
                 var pdf = new DocumentInfo(InputPdfPath, DocumentType.LocalPdf);
@@ -18,11 +18,12 @@ namespace GoogleDocumentsUnifier.LogicTests
                 {
                     new DocumentRequest(pdf)
                 };
-                dataManager.Unify(requests, OutputTempPath);
+                dataManager.Unify(requests, OutputPdfPath);
             }
         }
 
-        private const string InputPdfPath = "D:/Test/pdf.pdf";
-        private const string OutputTempPath = "D:/Test/result.pdf";
+        private const string ProjectJsonPath = "Keys/project.json";
+        private const string InputPdfPath = "Test/pdf.pdf";
+        private const string OutputPdfPath = "Test/result.pdf";
     }
 }

@@ -65,8 +65,8 @@ namespace GoogleDocumentsUnifier.LogicTests
             }
         }
 
-        private const string InputPdfPath = "D:/Test/pdf.pdf";
-        private const string InputDocPath = "D:/Test/doc.pdf";
-        private const string OutputTempPath = "D:/Test/test.pdf";
+        private const string InputPdfPath = "Test/pdf.pdf";
+        private const string InputDocPath = "Test/doc.pdf";
+        private const string OutputTempPath = "Test/test.pdf";
     }
 }
