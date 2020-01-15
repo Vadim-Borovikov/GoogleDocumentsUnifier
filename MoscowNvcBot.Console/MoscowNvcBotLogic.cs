@@ -32,6 +32,7 @@ namespace MoscowNvcBot.Console
             _infos = infos;
 
             Bot = new TelegramBotClient(token);
+            Bot.DeleteWebhookAsync().Wait();
             Bot.OnMessage += OnMessageReceivedAsync;
         }
 
