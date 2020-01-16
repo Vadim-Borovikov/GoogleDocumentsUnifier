@@ -40,26 +40,38 @@ namespace GoogleDocumentsUnifier.Logic
 
         private void Import(DocumentRequest request, Pdf pdfWriter)
         {
-            using (Pdf pdfReader = CreatePdfReader(request.Info))
+            bool tempFileNeeded = request.Info.DocumentType != DocumentType.LocalPdf;
+
+            string path;
+
+            if (tempFileNeeded)
+            {
+                using (var stream = new MemoryStream())
+                {
+                    SetupStream(stream, request.Info);
+                    path = Path.GetTempFileName();
+                    using (var fileStream = new FileStream(path, FileMode.Open))
+                    {
+                        stream.WriteTo(fileStream);
+                    }
+                }
+            }
+            else
+            {
+                path = request.Info.Id;
+            }
+
+            using (Pdf pdfReader = Pdf.CreateReader(path))
             {
                 for (uint i = 0; i < request.Amount; ++i)
                 {
                     pdfWriter.AddAllPages(pdfReader);
                 }
             }
-        }
 
-        private Pdf CreatePdfReader(DocumentInfo info)
-        {
-            if (info.DocumentType == DocumentType.LocalPdf)
+            if (tempFileNeeded)
             {
-                return Pdf.CreateReader(info.Id);
-            }
-
-            using (var stream = new MemoryStream())
-            {
-                SetupStream(stream, info);
-                return Pdf.CreateReader(stream);
+                File.Delete(path);
             }
         }
 

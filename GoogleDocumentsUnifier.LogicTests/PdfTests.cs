@@ -1,5 +1,4 @@
-﻿using System.IO;
-using GoogleDocumentsUnifier.Logic;
+﻿using GoogleDocumentsUnifier.Logic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoogleDocumentsUnifier.LogicTests
@@ -14,19 +13,6 @@ namespace GoogleDocumentsUnifier.LogicTests
             {
                 Assert.IsNotNull(pdf);
                 Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
-            }
-        }
-
-        [TestMethod]
-        public void PdfFileStreamTest()
-        {
-            using (var stream = new FileStream(Path, FileMode.Open))
-            {
-                using (Pdf pdf = Pdf.CreateReader(stream))
-                {
-                    Assert.IsNotNull(pdf);
-                    Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
-                }
             }
         }
 

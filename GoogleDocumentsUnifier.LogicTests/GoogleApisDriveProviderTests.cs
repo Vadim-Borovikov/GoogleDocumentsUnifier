@@ -14,7 +14,7 @@ namespace GoogleDocumentsUnifier.LogicTests
             {
                 using (GoogleApisDriveProvider provider = CreateProvider())
                 {
-                    using (var stream = new FileStream(temp.File.FullName, FileMode.Create))
+                    using (var stream = new FileStream(temp.File.FullName, FileMode.Open))
                     {
                         provider.DownloadFile(PdfId, stream);
                     }
@@ -30,7 +30,7 @@ namespace GoogleDocumentsUnifier.LogicTests
             {
                 using (GoogleApisDriveProvider provider = CreateProvider())
                 {
-                    using (var stream = new FileStream(temp.File.FullName, FileMode.Create))
+                    using (var stream = new FileStream(temp.File.FullName, FileMode.Open))
                     {
                         provider.ExportFile(DocId, "application/pdf", stream);
                     }

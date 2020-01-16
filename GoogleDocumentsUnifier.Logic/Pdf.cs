@@ -8,19 +8,6 @@ namespace GoogleDocumentsUnifier.Logic
     {
         private PdfDocument _document;
 
-        public static Pdf CreateReader(Stream inputStream)
-        {
-            var pdf = new Pdf();
-
-            var reader = new PdfReader(inputStream);
-
-            pdf._document = new PdfDocument(reader);
-
-            pdf._document.SetCloseReader(true);
-
-            return pdf;
-        }
-
         public static Pdf CreateReader(string inputPath)
         {
             var pdf = new Pdf();
