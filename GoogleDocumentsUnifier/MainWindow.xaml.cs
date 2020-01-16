@@ -51,7 +51,7 @@ namespace GoogleDocumentsUnifier
 
             var numericUpDown = new NumericUpDown
             {
-                Value = 20,
+                Value = 0,
                 Width = 40,
                 Height = 28
             };
