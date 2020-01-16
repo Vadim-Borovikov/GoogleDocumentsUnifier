@@ -55,6 +55,7 @@
     <Compile Include="GoogleApisDriveProviderTests.cs" />
     <Compile Include="PdfTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TempFile.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\GoogleDocumentsUnifier.Logic\GoogleDocumentsUnifier.Logic.csproj">
@@ -67,16 +68,10 @@
     <None Include="Keys\project.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Test\doc.pdf">
+    <None Include="Test\pdf1.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Test\pdf.pdf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\result.pdf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Test\test.pdf">
+    <None Include="Test\pdf2.pdf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

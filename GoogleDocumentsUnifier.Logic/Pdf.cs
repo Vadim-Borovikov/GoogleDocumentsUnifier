@@ -12,13 +12,21 @@ namespace GoogleDocumentsUnifier.Logic
             _document = new PdfDocument();
         }
 
-        public Pdf(Stream outputStream)
+        public Pdf(string inputPath)
         {
-            _document = PdfReader.Open(outputStream, PdfDocumentOpenMode.Import);
+            _document = PdfReader.Open(inputPath, PdfDocumentOpenMode.Import);
+
+            int _ = _document.PageCount; // Otherwise Save test failing LOL
+        }
+
+        public Pdf(Stream inputStream)
+        {
+            _document = PdfReader.Open(inputStream, PdfDocumentOpenMode.Import);
         }
 
         public void Dispose()
         {
+            _document.Close();
             _document.Dispose();
         }
 

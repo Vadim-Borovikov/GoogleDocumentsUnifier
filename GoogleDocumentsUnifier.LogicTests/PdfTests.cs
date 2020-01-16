@@ -17,10 +17,26 @@ namespace GoogleDocumentsUnifier.LogicTests
         }
 
         [TestMethod]
-        public void PdfDocumentStreamTest()
+        public void PdfFileTestAndPagesAmountTest()
         {
-            PdfDocumentStreamTest(InputPdfPath, 13);
-            PdfDocumentStreamTest(InputDocPath, 1);
+            using (var pdf = new Pdf(Path))
+            {
+                Assert.IsNotNull(pdf);
+                Assert.AreEqual(PagesAmount, pdf.PagesAmount);
+            }
+        }
+
+        [TestMethod]
+        public void PdfFileStreamTest()
+        {
+            using (var stream = new FileStream(Path, FileMode.Open))
+            {
+                using (var pdf = new Pdf(stream))
+                {
+                    Assert.IsNotNull(pdf);
+                    Assert.AreEqual(PagesAmount, pdf.PagesAmount);
+                }
+            }
         }
 
         [TestMethod]
@@ -28,32 +44,34 @@ namespace GoogleDocumentsUnifier.LogicTests
         {
             using (var pdf = new Pdf())
             {
-                using (var stream = new FileStream(InputPdfPath, FileMode.Open))
+                using (var other = new Pdf(Path))
                 {
-                    using (var other = new Pdf(stream))
+                    pdf.AddAllPages(other);
+                    Assert.AreEqual(PagesAmount, pdf.PagesAmount);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void SaveTest()
+        {
+            using (var pdf = new Pdf(Path))
+            {
+                using (var temp = new TempFile())
+                {
+                    pdf.Save(temp.File.FullName);
+                    Assert.IsTrue(temp.File.Exists);
+                    using (var tempPdf = new Pdf(temp.File.FullName))
                     {
-                        pdf.AddAllPages(other);
-                        Assert.IsNotNull(pdf);
-                        Assert.AreEqual(13, pdf.PagesAmount);
+                        Assert.IsNotNull(tempPdf);
+                        Assert.AreEqual(PagesAmount, tempPdf.PagesAmount);
                     }
                 }
             }
         }
 
-        private static void PdfDocumentStreamTest(string path, int pagesExpected)
-        {
-            using (var stream = new FileStream(path, FileMode.Open))
-            {
-                using (var pdf = new Pdf(stream))
-                {
-                    Assert.IsNotNull(pdf);
-                    Assert.AreEqual(pagesExpected, pdf.PagesAmount);
-                }
-            }
-        }
+        private const string Path = "Test/pdf2.pdf";
 
-        private const string InputPdfPath = "Test/pdf.pdf";
-        private const string InputDocPath = "Test/doc.pdf";
-        private const string OutputTempPath = "Test/test.pdf";
+        private const int PagesAmount = 2;
     }
 }

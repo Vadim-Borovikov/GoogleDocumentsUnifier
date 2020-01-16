@@ -44,16 +44,26 @@ namespace GoogleDocumentsUnifier.Logic
 
         private void Import(DocumentRequest request, Pdf result)
         {
+            using (Pdf pdf = CreatePdf(request.Info))
+            {
+                for (uint i = 0; i < request.Amount; ++i)
+                {
+                    result.AddAllPages(pdf);
+                }
+            }
+        }
+
+        private Pdf CreatePdf(DocumentInfo info)
+        {
+            if (info.DocumentType == DocumentType.LocalPdf)
+            {
+                return new Pdf(info.Id);
+            }
+
             using (var stream = new MemoryStream())
             {
-                SetupStream(stream, request.Info);
-                using (var pdf = new Pdf(stream))
-                {
-                    for (uint i = 0; i < request.Amount; ++i)
-                    {
-                        result.AddAllPages(pdf);
-                    }
-                }
+                SetupStream(stream, info);
+                return new Pdf(stream);
             }
         }
 
@@ -62,11 +72,7 @@ namespace GoogleDocumentsUnifier.Logic
             switch (info.DocumentType)
             {
                 case DocumentType.LocalPdf:
-                    using (var file = new FileStream(info.Id, FileMode.Open, FileAccess.Read))
-                    {
-                        file.CopyTo(stream);
-                    }
-                    break;
+                    throw new ArgumentOutOfRangeException(nameof(info.DocumentType), "Local pdf doesn't need stream!");
                 case DocumentType.WebPdf:
                     using (var client = new WebClient())
                     {

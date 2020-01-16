@@ -10,31 +10,33 @@ namespace GoogleDocumentsUnifier.LogicTests
         [TestMethod]
         public void DownloadFileTest()
         {
-            var file = new FileInfo(OutputPdfPath);
-            using (GoogleApisDriveProvider provider = CreateProvider())
+            using (var temp = new TempFile())
             {
-                using (var stream = new FileStream(file.FullName, FileMode.Create))
+                using (GoogleApisDriveProvider provider = CreateProvider())
                 {
-                    provider.DownloadFile(PdfId, stream);
+                    using (var stream = new FileStream(temp.File.FullName, FileMode.Create))
+                    {
+                        provider.DownloadFile(PdfId, stream);
+                    }
                 }
+                CheckFile(temp.File);
             }
-            Assert.IsTrue(file.Exists);
-            Assert.AreNotEqual(0, file.Length);
         }
 
         [TestMethod]
         public void ExportFileTest()
         {
-            var file = new FileInfo(OutputDocPath);
-            using (GoogleApisDriveProvider provider = CreateProvider())
+            using (var temp = new TempFile())
             {
-                using (var stream = new FileStream(file.FullName, FileMode.Create))
+                using (GoogleApisDriveProvider provider = CreateProvider())
                 {
-                    provider.ExportFile(DocId, "application/pdf", stream);
+                    using (var stream = new FileStream(temp.File.FullName, FileMode.Create))
+                    {
+                        provider.ExportFile(DocId, "application/pdf", stream);
+                    }
                 }
+                CheckFile(temp.File);
             }
-            Assert.IsTrue(file.Exists);
-            Assert.AreNotEqual(0, file.Length);
         }
 
         private static GoogleApisDriveProvider CreateProvider()
@@ -43,9 +45,14 @@ namespace GoogleDocumentsUnifier.LogicTests
             return new GoogleApisDriveProvider(projectJson);
         }
 
+        private static void CheckFile(FileInfo file)
+        {
+            Assert.IsTrue(file.Exists);
+            Assert.AreNotEqual(0, file.Length);
+        }
+
         private const string ProjectJsonPath = "Keys/project.json";
-        private const string OutputPdfPath = "Test/pdf.pdf";
-        private const string OutputDocPath = "Test/doc.pdf";
+
         private const string PdfId = "17hnk4p5kIS8U4vK5JB18B59WMy-dEVvk";
         private const string DocId = "1WxXjtQu03JfLR5dhECNWcYX8EyoHUJePDrUocQnsB8g";
     }

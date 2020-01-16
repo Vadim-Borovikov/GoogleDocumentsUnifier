@@ -13,18 +13,29 @@ namespace GoogleDocumentsUnifier.LogicTests
             string projectJson = File.ReadAllText(ProjectJsonPath);
             using (var dataManager = new DataManager(projectJson))
             {
-                var pdf = new DocumentInfo(InputPdfPath, DocumentType.LocalPdf);
+                var pdf1 = new DocumentInfo(Pdf1Path, DocumentType.LocalPdf);
+                var pdf2 = new DocumentInfo(Pdf2Path, DocumentType.LocalPdf);
                 var requests = new[]
                 {
-                    new DocumentRequest(pdf)
+                    new DocumentRequest(pdf1),
+                    new DocumentRequest(pdf2)
                 };
-                dataManager.Unify(requests, OutputPdfPath);
+                using (var temp = new TempFile())
+                {
+                    dataManager.Unify(requests, temp.File.FullName);
+                    using (var pdf = new Pdf(temp.File.FullName))
+                    {
+                        Assert.AreEqual(TotalPagesAmount, pdf.PagesAmount);
+                    }
+                }
             }
         }
 
         private const string ProjectJsonPath = "Keys/project.json";
 
-        private const string InputPdfPath = "Test/pdf.pdf";
-        private const string OutputPdfPath = "Test/result.pdf";
+        private const string Pdf1Path = "Test/pdf1.pdf";
+        private const string Pdf2Path = "Test/pdf2.pdf";
+
+        private const int TotalPagesAmount = 3;
     }
 }
