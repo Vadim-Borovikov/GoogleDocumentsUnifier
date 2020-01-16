@@ -4,14 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="GoogleDocumentsUnifier" Height="450" Width="444" MinHeight="180" MinWidth="444"
+        Title="GoogleDocumentsUnifier" Height="450" Width="350" MinHeight="180" MinWidth="350"
         x:ClassModifier="internal" Closing="WindowClosing">
     <Grid>
-        <ScrollViewer Margin="175,10,10,38" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer Margin="10,10,10,38" VerticalScrollBarVisibility="Auto">
             <Grid Name="Grid" VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="170*"/>
-                    <ColumnDefinition Width="69*"/>
+                    <ColumnDefinition Width="50*"/>
                 </Grid.ColumnDefinitions>
             </Grid>
         </ScrollViewer>
