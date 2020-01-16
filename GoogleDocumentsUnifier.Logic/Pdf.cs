@@ -22,11 +22,6 @@ namespace GoogleDocumentsUnifier.Logic
             _document.Dispose();
         }
 
-        public void AddEmptyPage()
-        {
-            _document.AddPage();
-        }
-
         public void AddAllPages(Pdf pdf)
         {
             for (int i = 0; i < pdf.PagesAmount; ++i)

@@ -24,19 +24,6 @@ namespace GoogleDocumentsUnifier.LogicTests
         }
 
         [TestMethod]
-        public void AddEmptyPageAndSaveTest()
-        {
-            using (var pdf = new Pdf())
-            {
-                pdf.AddEmptyPage();
-                Assert.IsNotNull(pdf);
-                Assert.AreEqual(1, pdf.PagesAmount);
-                pdf.Save(OutputTempPath);
-                Assert.IsTrue(File.Exists(OutputTempPath));
-            }
-        }
-
-        [TestMethod]
         public void AddAllPagesTest()
         {
             using (var pdf = new Pdf())
