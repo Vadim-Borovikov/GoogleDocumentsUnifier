@@ -17,7 +17,7 @@ namespace GoogleDocumentsUnifier.LogicTests
         }
 
         [TestMethod]
-        public void PdfFileTestAndPagesAmountTest()
+        public void PdfFileAndPagesAmountTest()
         {
             using (var pdf = new Pdf(Path))
             {
