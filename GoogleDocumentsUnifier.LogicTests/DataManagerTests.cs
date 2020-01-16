@@ -23,9 +23,9 @@ namespace GoogleDocumentsUnifier.LogicTests
                 using (var temp = new TempFile())
                 {
                     dataManager.Unify(requests, temp.File.FullName);
-                    using (var pdf = new Pdf(temp.File.FullName))
+                    using (Pdf pdf = Pdf.CreateReader(temp.File.FullName))
                     {
-                        Assert.AreEqual(TotalPagesAmount, pdf.PagesAmount);
+                        Assert.AreEqual(TotalPagesAmount, pdf.GetPagesAmount());
                     }
                 }
             }

@@ -1,50 +1,64 @@
 ﻿using System;
 using System.IO;
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.IO;
+using iText.Kernel.Pdf;
 
 namespace GoogleDocumentsUnifier.Logic
 {
     public class Pdf : IDisposable
     {
-        public Pdf()
+        private PdfDocument _document;
+
+        public static Pdf CreateReader(Stream inputStream)
         {
-            _document = new PdfDocument();
+            var pdf = new Pdf();
+
+            var reader = new PdfReader(inputStream);
+
+            pdf._document = new PdfDocument(reader);
+
+            pdf._document.SetCloseReader(true);
+
+            return pdf;
         }
 
-        public Pdf(string inputPath)
+        public static Pdf CreateReader(string inputPath)
         {
-            _document = PdfReader.Open(inputPath, PdfDocumentOpenMode.Import);
+            var pdf = new Pdf();
 
-            int _ = _document.PageCount; // Otherwise Save test failing LOL
+            var reader = new PdfReader(inputPath);
+
+            pdf._document = new PdfDocument(reader);
+
+            pdf._document.SetCloseReader(true);
+
+            return pdf;
         }
 
-        public Pdf(Stream inputStream)
+        public static Pdf CreateWriter(string outputPath)
         {
-            _document = PdfReader.Open(inputStream, PdfDocumentOpenMode.Import);
+            var pdf = new Pdf();
+
+            var writer = new PdfWriter(outputPath);
+
+            pdf._document = new PdfDocument(writer);
+
+            pdf._document.SetCloseWriter(true);
+
+            return pdf;
         }
+
+        private Pdf() { }
 
         public void Dispose()
         {
             _document.Close();
-            _document.Dispose();
         }
 
         public void AddAllPages(Pdf pdf)
         {
-            for (int i = 0; i < pdf.PagesAmount; ++i)
-            {
-                _document.AddPage(pdf._document.Pages[i]);
-            }
+            pdf._document.CopyPagesTo(1, pdf.GetPagesAmount(), _document);
         }
 
-        public void Save(string path)
-        {
-            _document.Save(path);
-        }
-
-        private readonly PdfDocument _document;
-
-        public int PagesAmount => _document.PageCount;
+        public int GetPagesAmount() => _document.GetNumberOfPages();
     }
 }

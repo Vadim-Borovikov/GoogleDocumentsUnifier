@@ -21,49 +21,45 @@ namespace GoogleDocumentsUnifier.Logic
 
         public void Copy(DocumentRequest request, string resultPath)
         {
-            using (var result = new Pdf())
+            using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {
-                Import(request, result);
-
-                result.Save(resultPath);
+                Import(request, pdfWriter);
             }
         }
 
         public void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
         {
-            using (var result = new Pdf())
+            using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {
                 foreach (DocumentRequest request in requests)
                 {
-                    Import(request, result);
+                    Import(request, pdfWriter);
                 }
-
-                result.Save(resultPath);
             }
         }
 
-        private void Import(DocumentRequest request, Pdf result)
+        private void Import(DocumentRequest request, Pdf pdfWriter)
         {
-            using (Pdf pdf = CreatePdf(request.Info))
+            using (Pdf pdfReader = CreatePdfReader(request.Info))
             {
                 for (uint i = 0; i < request.Amount; ++i)
                 {
-                    result.AddAllPages(pdf);
+                    pdfWriter.AddAllPages(pdfReader);
                 }
             }
         }
 
-        private Pdf CreatePdf(DocumentInfo info)
+        private Pdf CreatePdfReader(DocumentInfo info)
         {
             if (info.DocumentType == DocumentType.LocalPdf)
             {
-                return new Pdf(info.Id);
+                return Pdf.CreateReader(info.Id);
             }
 
             using (var stream = new MemoryStream())
             {
                 SetupStream(stream, info);
-                return new Pdf(stream);
+                return Pdf.CreateReader(stream);
             }
         }
 

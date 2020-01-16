@@ -8,21 +8,12 @@ namespace GoogleDocumentsUnifier.LogicTests
     public class PdfTests
     {
         [TestMethod]
-        public void PdfTest()
+        public void PdfFileReaderAndPagesAmountTest()
         {
-            using (var pdf = new Pdf())
+            using (Pdf pdf = Pdf.CreateReader(Path))
             {
                 Assert.IsNotNull(pdf);
-            }
-        }
-
-        [TestMethod]
-        public void PdfFileAndPagesAmountTest()
-        {
-            using (var pdf = new Pdf(Path))
-            {
-                Assert.IsNotNull(pdf);
-                Assert.AreEqual(PagesAmount, pdf.PagesAmount);
+                Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
             }
         }
 
@@ -31,40 +22,25 @@ namespace GoogleDocumentsUnifier.LogicTests
         {
             using (var stream = new FileStream(Path, FileMode.Open))
             {
-                using (var pdf = new Pdf(stream))
+                using (Pdf pdf = Pdf.CreateReader(stream))
                 {
                     Assert.IsNotNull(pdf);
-                    Assert.AreEqual(PagesAmount, pdf.PagesAmount);
+                    Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
                 }
             }
         }
 
         [TestMethod]
-        public void AddAllPagesTest()
+        public void CreateWriterAndAddAllPagesTest()
         {
-            using (var pdf = new Pdf())
+            using (var temp = new TempFile())
             {
-                using (var other = new Pdf(Path))
+                using (Pdf pdf = Pdf.CreateWriter(temp.File.FullName))
                 {
-                    pdf.AddAllPages(other);
-                    Assert.AreEqual(PagesAmount, pdf.PagesAmount);
-                }
-            }
-        }
-
-        [TestMethod]
-        public void SaveTest()
-        {
-            using (var pdf = new Pdf(Path))
-            {
-                using (var temp = new TempFile())
-                {
-                    pdf.Save(temp.File.FullName);
-                    Assert.IsTrue(temp.File.Exists);
-                    using (var tempPdf = new Pdf(temp.File.FullName))
+                    using (Pdf other = Pdf.CreateReader(Path))
                     {
-                        Assert.IsNotNull(tempPdf);
-                        Assert.AreEqual(PagesAmount, tempPdf.PagesAmount);
+                        pdf.AddAllPages(other);
+                        Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
                     }
                 }
             }
