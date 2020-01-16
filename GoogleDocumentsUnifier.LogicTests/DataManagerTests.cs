@@ -23,6 +23,7 @@ namespace GoogleDocumentsUnifier.LogicTests
         }
 
         private const string ProjectJsonPath = "Keys/project.json";
+
         private const string InputPdfPath = "Test/pdf.pdf";
         private const string OutputPdfPath = "Test/result.pdf";
     }
