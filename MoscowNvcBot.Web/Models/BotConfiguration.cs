@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace MoscowNvcBot.Web.Models
 {
     public class BotConfiguration
@@ -9,6 +11,10 @@ namespace MoscowNvcBot.Web.Models
         public int Port { get; set; }
 
         public string StartMessagePrefix { get; set; }
+
+        public string GoogleProjectJson { get; set; }
+
+        public List<string> Sources { get; set; }
 
         public const string Route = "api/update";
 

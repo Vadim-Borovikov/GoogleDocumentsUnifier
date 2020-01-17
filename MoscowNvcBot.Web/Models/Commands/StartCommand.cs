@@ -25,7 +25,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             var builder = new StringBuilder(_startMessagePrefix);
             foreach (Command command in _commands)
             {
-                builder.AppendLine($"/{command.Name} – {command.Description}\n");
+                builder.Append($"/{command.Name} – {command.Description}\n");
             }
 
             await client.SendTextMessageAsync(message.Chat, builder.ToString());

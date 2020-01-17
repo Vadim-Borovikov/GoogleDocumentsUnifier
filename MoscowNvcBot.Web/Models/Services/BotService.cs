@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GoogleDocumentsUnifier.Logic;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using MoscowNvcBot.Web.Models.Commands;
@@ -15,18 +16,25 @@ namespace MoscowNvcBot.Web.Models.Services
 
         private readonly BotConfiguration _config;
 
+        private readonly DataManager _googleDataManager;
+
         public BotService(IOptions<BotConfiguration> options)
         {
             _config = options.Value;
 
             Client = new TelegramBotClient(_config.Token);
 
-            var commands = new List<Command>();
+            _googleDataManager = new DataManager(_config.GoogleProjectJson);
+
+            var commands = new List<Command>
+            {
+                new AltogetherCommand(_config.Sources, _googleDataManager)
+            };
 
             Commands = commands.AsReadOnly();
             var startCommand = new StartCommand(_config.StartMessagePrefix, Commands);
 
-            commands.Add(startCommand);
+            commands.Insert(0, startCommand);
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -36,6 +44,7 @@ namespace MoscowNvcBot.Web.Models.Services
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
+            _googleDataManager.Dispose();
             await Client.DeleteWebhookAsync(cancellationToken);
         }
     }
