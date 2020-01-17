@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GoogleDocumentsUnifier.Logic;
@@ -28,7 +29,8 @@ namespace MoscowNvcBot.Web.Models.Services
 
             var commands = new List<Command>
             {
-                new AltogetherCommand(_config.Sources, _googleDataManager)
+                new AltogetherCommand(_config.Sources, _googleDataManager),
+                new SeparatelyCommand(_config.Sources, _googleDataManager)
             };
 
             Commands = commands.AsReadOnly();
