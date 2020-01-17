@@ -122,7 +122,7 @@ namespace MoscowNvcBot.Console.Legacy
 
         private string UnifyInfos()
         {
-            IEnumerable<DocumentRequest> requests = _infos.Select(info => new DocumentRequest(info, 1));
+            IEnumerable<DocumentRequest> requests = _infos.Select(info => new DocumentRequest(info));
 
             string path = Path.GetTempFileName();
             _googleDataManager.Unify(requests, path);
