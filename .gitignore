@@ -240,6 +240,7 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/GoogleDocumentsUnifier.Logic.Tests/Keys/project.json
 /MoscowNvcBot.Web/appsettings.Development.json
 /MoscowNvcBot.Console.Legacy/Keys/project.json
 /MoscowNvcBot.Console.Legacy/Keys/token.txt

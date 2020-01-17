@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoscowNvcBot.Console.Legacy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MoscowNvcBot.Web", "MoscowNvcBot.Web\MoscowNvcBot.Web.csproj", "{1552C966-86EE-4A41-B04E-BE878EDC7732}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleDocumentsUnifier.Logic", "GoogleDocumentsUnifier.Logic\GoogleDocumentsUnifier.Logic.csproj", "{4038923E-ABAD-4364-82EE-FD42DC21D45E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Logic.Tests", "GoogleDocumentsUnifier.Logic.Tests\GoogleDocumentsUnifier.Logic.Tests.csproj", "{6D8AE602-3BD9-4E22-994F-CD6A92924365}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{1552C966-86EE-4A41-B04E-BE878EDC7732}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1552C966-86EE-4A41-B04E-BE878EDC7732}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1552C966-86EE-4A41-B04E-BE878EDC7732}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4038923E-ABAD-4364-82EE-FD42DC21D45E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4038923E-ABAD-4364-82EE-FD42DC21D45E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4038923E-ABAD-4364-82EE-FD42DC21D45E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4038923E-ABAD-4364-82EE-FD42DC21D45E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D8AE602-3BD9-4E22-994F-CD6A92924365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D8AE602-3BD9-4E22-994F-CD6A92924365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D8AE602-3BD9-4E22-994F-CD6A92924365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D8AE602-3BD9-4E22-994F-CD6A92924365}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
