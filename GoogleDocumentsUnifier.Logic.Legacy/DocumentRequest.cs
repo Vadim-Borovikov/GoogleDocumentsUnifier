@@ -1,4 +1,4 @@
-﻿namespace GoogleDocumentsUnifier.Logic
+﻿namespace GoogleDocumentsUnifier.Logic.Legacy
 {
     public class DocumentRequest
     {

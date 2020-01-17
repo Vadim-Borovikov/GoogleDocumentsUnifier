@@ -4,7 +4,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 
-namespace GoogleDocumentsUnifier.Logic
+namespace GoogleDocumentsUnifier.Logic.Legacy
 {
     public class GoogleApisDriveProvider : IDisposable
     {

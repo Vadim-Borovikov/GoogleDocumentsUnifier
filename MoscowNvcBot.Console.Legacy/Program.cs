@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using GoogleDocumentsUnifier.Logic;
+using GoogleDocumentsUnifier.Logic.Legacy;
 using Telegram.Bot.Types;
 using File = System.IO.File;
 
-namespace MoscowNvcBot.Console
+namespace MoscowNvcBot.Console.Legacy
 {
     internal static class Program
     {

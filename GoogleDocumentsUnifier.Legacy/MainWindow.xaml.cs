@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using ControlLib;
-using GoogleDocumentsUnifier.Logic;
+using GoogleDocumentsUnifier.Logic.Legacy;
 
-namespace GoogleDocumentsUnifier
+namespace GoogleDocumentsUnifier.Legacy
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

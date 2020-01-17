@@ -6,8 +6,8 @@
     <ProjectGuid>{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GoogleDocumentsUnifier.LogicTests</RootNamespace>
-    <AssemblyName>GoogleDocumentsUnifier.LogicTests</AssemblyName>
+    <RootNamespace>GoogleDocumentsUnifier.Logic.Tests.Legacy</RootNamespace>
+    <AssemblyName>GoogleDocumentsUnifier.Logic.Tests.Legacy</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -58,9 +58,9 @@
     <Compile Include="TempFile.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\GoogleDocumentsUnifier.Logic\GoogleDocumentsUnifier.Logic.csproj">
+    <ProjectReference Include="..\GoogleDocumentsUnifier.Logic.Legacy\GoogleDocumentsUnifier.Logic.Legacy.csproj">
       <Project>{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}</Project>
-      <Name>GoogleDocumentsUnifier.Logic</Name>
+      <Name>GoogleDocumentsUnifier.Logic.Legacy</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

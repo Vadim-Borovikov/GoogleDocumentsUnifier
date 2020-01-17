@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace GoogleDocumentsUnifier.LogicTests
+namespace GoogleDocumentsUnifier.Logic.Tests.Legacy
 {
     internal class TempFile : IDisposable
     {

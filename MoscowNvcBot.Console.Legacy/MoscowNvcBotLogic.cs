@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using GoogleDocumentsUnifier.Logic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GoogleDocumentsUnifier.Logic.Legacy;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
@@ -13,7 +13,7 @@ using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 using File = System.IO.File;
 
-namespace MoscowNvcBot.Console
+namespace MoscowNvcBot.Console.Legacy
 {
     internal class MoscowNvcBotLogic
     {

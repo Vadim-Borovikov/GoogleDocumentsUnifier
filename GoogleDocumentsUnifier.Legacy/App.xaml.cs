@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace GoogleDocumentsUnifier
+namespace GoogleDocumentsUnifier.Legacy
 {
     /// <summary>
     /// Interaction logic for App.xaml

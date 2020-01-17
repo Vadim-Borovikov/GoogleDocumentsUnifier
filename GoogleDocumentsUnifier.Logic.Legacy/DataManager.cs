@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 
-namespace GoogleDocumentsUnifier.Logic
+namespace GoogleDocumentsUnifier.Logic.Legacy
 {
     public class DataManager : IDisposable
     {

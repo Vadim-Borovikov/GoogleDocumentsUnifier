@@ -1,8 +1,8 @@
 ﻿using System.IO;
-using GoogleDocumentsUnifier.Logic;
+using GoogleDocumentsUnifier.Logic.Legacy;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace GoogleDocumentsUnifier.LogicTests
+namespace GoogleDocumentsUnifier.Logic.Tests.Legacy
 {
     [TestClass]
     public class GoogleApisDriveProviderTests

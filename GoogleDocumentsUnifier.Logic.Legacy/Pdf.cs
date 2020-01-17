@@ -1,8 +1,7 @@
 ﻿using System;
-using System.IO;
 using iText.Kernel.Pdf;
 
-namespace GoogleDocumentsUnifier.Logic
+namespace GoogleDocumentsUnifier.Logic.Legacy
 {
     public class Pdf : IDisposable
     {

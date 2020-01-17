@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Configuration;
-using GoogleDocumentsUnifier.Logic;
+using GoogleDocumentsUnifier.Logic.Legacy;
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace GoogleDocumentsUnifier
+namespace GoogleDocumentsUnifier.Legacy
 {
     internal class SourcesConfigSection : ConfigurationSection
     {
