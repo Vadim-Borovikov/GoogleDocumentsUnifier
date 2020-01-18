@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoogleDocumentsUnifier.Logic.Tests
@@ -10,11 +9,10 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         [TestMethod]
         public async Task UnifyTest()
         {
-            string projectJson = File.ReadAllText(ProjectJsonPath);
-            using (var dataManager = new DataManager(projectJson))
+            using (var dataManager = new DataManager(TestsConfiguration.Instance.GoogleProjectJson))
             {
-                var pdf1 = new DocumentInfo(Pdf1Path, DocumentType.LocalPdf);
-                var pdf2 = new DocumentInfo(Pdf2Path, DocumentType.LocalPdf);
+                var pdf1 = new DocumentInfo(TestsConfiguration.Instance.Pdf1Path, DocumentType.LocalPdf);
+                var pdf2 = new DocumentInfo(TestsConfiguration.Instance.Pdf2Path, DocumentType.LocalPdf);
                 var requests = new[]
                 {
                     new DocumentRequest(pdf1),
@@ -30,11 +28,6 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 }
             }
         }
-
-        private const string ProjectJsonPath = "Keys/project.json";
-
-        private const string Pdf1Path = "Test/pdf1.pdf";
-        private const string Pdf2Path = "Test/pdf2.pdf";
 
         private const int TotalPagesAmount = 3;
     }

@@ -8,7 +8,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         [TestMethod]
         public void PdfFileReaderAndPagesAmountTest()
         {
-            using (Pdf pdf = Pdf.CreateReader(Path))
+            using (Pdf pdf = Pdf.CreateReader(TestsConfiguration.Instance.Pdf2Path))
             {
                 Assert.IsNotNull(pdf);
                 Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
@@ -22,7 +22,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
             {
                 using (Pdf pdf = Pdf.CreateWriter(temp.File.FullName))
                 {
-                    using (Pdf other = Pdf.CreateReader(Path))
+                    using (Pdf other = Pdf.CreateReader(TestsConfiguration.Instance.Pdf2Path))
                     {
                         pdf.AddAllPages(other);
                         Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
@@ -30,8 +30,6 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 }
             }
         }
-
-        private const string Path = "Test/pdf2.pdf";
 
         private const int PagesAmount = 2;
     }
