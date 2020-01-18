@@ -29,7 +29,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         {
             IConfigurationRoot config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile("appsettings.Development.json")
+                .AddJsonFile("appsettings.Development.json", true)
                 .Build();
 
             string googleProjectJson = testContext.Properties["GoogleProjectJson"]?.ToString();
