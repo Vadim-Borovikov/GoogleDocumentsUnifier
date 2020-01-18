@@ -26,18 +26,26 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            foreach (DocumentRequest request in _requests)
-            {
-                Task task = SendGooglePdfAsyncTask(client, message.Chat, request);
+            IEnumerable<Task> tasks = _requests.Select(request => SendGooglePdfAsync(message.Chat, client, request));
+            await Task.WhenAll(tasks);
+        }
 
-                await Utils.WrapWithChatActionAsync(task, client, message.Chat, ChatAction.UploadDocument);
-            }
+        private async Task SendGooglePdfAsync(Chat chat, ITelegramBotClient client, DocumentRequest request)
+        {
+            Task task = SendGooglePdfAsyncTask(client, chat, request);
+
+            await Utils.WrapWithChatActionAsync(task, client, chat, ChatAction.UploadDocument);
         }
 
         private async Task SendGooglePdfAsyncTask(ITelegramBotClient client, Chat chat, DocumentRequest request)
         {
-            string fileName = await GetNameAsync(request.Info);
-            string path = await CopyRequest(request);
+            Task<string> fileNameTask = GetNameAsync(request.Info);
+            Task<string> pathTask = CopyRequest(request);
+
+            await Task.WhenAll(fileNameTask, pathTask);
+
+            string fileName = fileNameTask.Result;
+            string path = pathTask.Result;
 
             await Utils.SendFileAsync(client, chat, fileName, path);
 
