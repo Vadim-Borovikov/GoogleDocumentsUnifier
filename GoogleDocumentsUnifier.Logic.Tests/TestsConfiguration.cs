@@ -32,7 +32,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 .AddJsonFile("appsettings.Development.json", true)
                 .Build();
 
-            string googleProjectJson = testContext.Properties["GoogleProjectJson"]?.ToString();
+            string googleProjectJson = testContext.Properties["GoogleProjectJson"]?.ToString()?.Replace("__", " ");
             if (string.IsNullOrWhiteSpace(googleProjectJson))
             {
                 googleProjectJson = config["GoogleProjectJson"];
