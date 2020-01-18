@@ -1,4 +1,6 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
+using Google.Apis.Download;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoogleDocumentsUnifier.Logic.Tests
@@ -7,7 +9,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
     public class GoogleApisDriveProviderTests
     {
         [TestMethod]
-        public void DownloadFileTest()
+        public async Task DownloadFileTest()
         {
             using (var temp = new TempFile())
             {
@@ -15,7 +17,8 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 {
                     using (var stream = new FileStream(temp.File.FullName, FileMode.Open))
                     {
-                        provider.DownloadFile(PdfId, stream);
+                        IDownloadProgress progress = await provider.DownloadFileAsync(PdfId, stream);
+                        Assert.AreEqual(DownloadStatus.Completed, progress.Status);
                     }
                 }
                 CheckFile(temp.File);
@@ -23,7 +26,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         }
 
         [TestMethod]
-        public void ExportFileTest()
+        public async Task ExportFileTest()
         {
             using (var temp = new TempFile())
             {
@@ -31,7 +34,8 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 {
                     using (var stream = new FileStream(temp.File.FullName, FileMode.Open))
                     {
-                        provider.ExportFile(DocId, "application/pdf", stream);
+                        IDownloadProgress progress = await provider.ExportFileAsync(DocId, "application/pdf", stream);
+                        Assert.AreEqual(DownloadStatus.Completed, progress.Status);
                     }
                 }
                 CheckFile(temp.File);

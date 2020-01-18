@@ -20,7 +20,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             _commands = commands;
         }
 
-        internal override async Task Execute(Message message, ITelegramBotClient client)
+        internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
             var builder = new StringBuilder(_startMessagePrefix);
             foreach (Command command in _commands)

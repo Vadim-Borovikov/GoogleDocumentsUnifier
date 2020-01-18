@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
+using File = Google.Apis.Drive.v3.Data.File;
 
 namespace GoogleDocumentsUnifier.Logic
 {
@@ -31,18 +34,22 @@ namespace GoogleDocumentsUnifier.Logic
             _driveService.Dispose();
         }
 
-        public void DownloadFile(string id, Stream stream)
+        public async Task<IDownloadProgress> DownloadFileAsync(string id, Stream stream)
         {
             FilesResource.GetRequest request = _driveService.Files.Get(id);
-            request.Download(stream);
+            return await request.DownloadAsync(stream);
         }
 
-        public void ExportFile(string id, string targetMimeType, Stream stream)
+        public async Task<IDownloadProgress> ExportFileAsync(string id, string targetMimeType, Stream stream)
         {
             FilesResource.ExportRequest request = _driveService.Files.Export(id, targetMimeType);
-            request.Download(stream);
+            return await request.DownloadAsync(stream);
         }
 
-        internal string GetName(string id) => _driveService.Files.Get(id).Execute().Name;
+        internal async Task<string> GetNameAsync(string id)
+        {
+            File file = await _driveService.Files.Get(id).ExecuteAsync();
+            return file.Name;
+        }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace GoogleDocumentsUnifier.Logic
 {
@@ -17,28 +18,28 @@ namespace GoogleDocumentsUnifier.Logic
             _provider.Dispose();
         }
 
-        public string GetName(string id) => _provider.GetName(id);
+        public async Task<string> GetNameAsync(string id) => await _provider.GetNameAsync(id);
 
-        public void Copy(DocumentRequest request, string resultPath)
+        public async Task CopyAsync(DocumentRequest request, string resultPath)
         {
             using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {
-                Import(request, pdfWriter);
+                await ImportAsync(request, pdfWriter);
             }
         }
 
-        public void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
+        public async Task UnifyAsync(IEnumerable<DocumentRequest> requests, string resultPath)
         {
             using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {
                 foreach (DocumentRequest request in requests)
                 {
-                    Import(request, pdfWriter);
+                    await ImportAsync(request, pdfWriter);
                 }
             }
         }
 
-        private void Import(DocumentRequest request, Pdf pdfWriter)
+        private async Task ImportAsync(DocumentRequest request, Pdf pdfWriter)
         {
             bool tempFileNeeded = request.Info.DocumentType != DocumentType.LocalPdf;
 
@@ -48,7 +49,7 @@ namespace GoogleDocumentsUnifier.Logic
             {
                 using (var stream = new MemoryStream())
                 {
-                    SetupStream(stream, request.Info);
+                    await SetupStreamAsync(stream, request.Info);
                     path = Path.GetTempFileName();
                     using (var fileStream = new FileStream(path, FileMode.Open))
                     {
@@ -75,7 +76,7 @@ namespace GoogleDocumentsUnifier.Logic
             }
         }
 
-        private void SetupStream(Stream stream, DocumentInfo info)
+        private async Task SetupStreamAsync(Stream stream, DocumentInfo info)
         {
             switch (info.DocumentType)
             {
@@ -89,10 +90,10 @@ namespace GoogleDocumentsUnifier.Logic
                     }
                     break;
                 case DocumentType.GooglePdf:
-                    _provider.DownloadFile(info.Id, stream);
+                    await _provider.DownloadFileAsync(info.Id, stream);
                     break;
                 case DocumentType.GoogleDocument:
-                    _provider.ExportFile(info.Id, PdfMimeType, stream);
+                    await _provider.ExportFileAsync(info.Id, PdfMimeType, stream);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(info.DocumentType));

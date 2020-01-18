@@ -30,7 +30,7 @@ namespace MoscowNvcBot.Web.Controllers
                 Command command = _botService.Commands.FirstOrDefault(c => c.Contains(message));
                 if (command != null)
                 {
-                    await command.Execute(message, _botService.Client);
+                    await command.ExecuteAsync(message, _botService.Client);
                 }
             }
 

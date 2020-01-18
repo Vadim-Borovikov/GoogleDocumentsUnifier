@@ -25,25 +25,25 @@ namespace MoscowNvcBot.Web.Models.Commands
             _googleDataManager = googleDataManager;
         }
 
-        internal override async Task Execute(Message message, ITelegramBotClient client)
+        internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Task task = SendAllGooglePdfAsyncTask(client, message.Chat);
+            Task task = SendAllGooglePdfAsync(client, message.Chat);
             await Utils.WrapWithChatActionAsync(task, client, message.Chat, ChatAction.UploadDocument);
         }
 
-        private async Task SendAllGooglePdfAsyncTask(ITelegramBotClient client, Chat chat)
+        private async Task SendAllGooglePdfAsync(ITelegramBotClient client, Chat chat)
         {
-            string path = await Task.Run(() => UnifyInfos());
+            string path = await UnifyInfosAsync();
 
             await Utils.SendFileAsync(client, chat, FileName, path);
 
             System.IO.File.Delete(path);
         }
 
-        private string UnifyInfos()
+        private async Task<string> UnifyInfosAsync()
         {
             string path = Path.GetTempFileName();
-            _googleDataManager.Unify(_requests, path);
+            await _googleDataManager.UnifyAsync(_requests, path);
 
             return path;
         }

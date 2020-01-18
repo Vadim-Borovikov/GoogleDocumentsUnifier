@@ -24,7 +24,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             _googleDataManager = googleDataManager;
         }
 
-        internal override async Task Execute(Message message, ITelegramBotClient client)
+        internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
             foreach (DocumentRequest request in _requests)
             {
@@ -36,26 +36,26 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private async Task SendGooglePdfAsyncTask(ITelegramBotClient client, Chat chat, DocumentRequest request)
         {
-            string fileName = await Task.Run(() => GetName(request.Info));
-            string path = await Task.Run(() => CopyRequest(request));
+            string fileName = await GetNameAsync(request.Info);
+            string path = await CopyRequest(request);
 
             await Utils.SendFileAsync(client, chat, fileName, path);
 
             File.Delete(path);
         }
 
-        private string GetName(DocumentInfo info)
+        private async Task<string> GetNameAsync(DocumentInfo info)
         {
-            string name = _googleDataManager.GetName(info.Id);
+            string name = await _googleDataManager.GetNameAsync(info.Id);
             name = name.Replace("«", "");
             name = name.Replace("»", "");
             return $"{name}.pdf";
         }
 
-        private string CopyRequest(DocumentRequest request)
+        private async Task<string> CopyRequest(DocumentRequest request)
         {
             string path = Path.GetTempFileName();
-            _googleDataManager.Copy(request, path);
+            await _googleDataManager.CopyAsync(request, path);
             return path;
         }
     }

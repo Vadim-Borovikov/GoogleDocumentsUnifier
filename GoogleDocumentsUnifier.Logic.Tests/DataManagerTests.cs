@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoogleDocumentsUnifier.Logic.Tests
@@ -7,7 +8,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
     public class DataManagerTests
     {
         [TestMethod]
-        public void UnifyTest()
+        public async Task UnifyTest()
         {
             string projectJson = File.ReadAllText(ProjectJsonPath);
             using (var dataManager = new DataManager(projectJson))
@@ -21,7 +22,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 };
                 using (var temp = new TempFile())
                 {
-                    dataManager.Unify(requests, temp.File.FullName);
+                    await dataManager.UnifyAsync(requests, temp.File.FullName);
                     using (Pdf pdf = Pdf.CreateReader(temp.File.FullName))
                     {
                         Assert.AreEqual(TotalPagesAmount, pdf.GetPagesAmount());
