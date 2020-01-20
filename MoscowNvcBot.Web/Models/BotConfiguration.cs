@@ -16,6 +16,10 @@ namespace MoscowNvcBot.Web.Models
 
         public List<string> Sources { get; set; }
 
+        public string TargetId { get; set; }
+
+        public string TargetPrefix { get; set; }
+
         public const string Route = "api/update";
 
         public string Url => $"{Host}:{Port}/{Route}";

@@ -18,7 +18,12 @@ namespace GoogleDocumentsUnifier.Logic
             _provider.Dispose();
         }
 
-        public async Task<string> GetNameAsync(string id) => await _provider.GetNameAsync(id);
+        public async Task<FileInfo> GetFileInfoAsync(string id) => await _provider.GetFileInfoAsync(id);
+
+        public async Task<FileInfo> FindFileInFolderAsync(string target, string pdfName)
+        {
+            return await _provider.FindFileInFolderAsync(target, pdfName);
+        }
 
         public async Task CopyAsync(DocumentRequest request, string resultPath)
         {
@@ -36,6 +41,22 @@ namespace GoogleDocumentsUnifier.Logic
                 {
                     await ImportAsync(request, pdfWriter);
                 }
+            }
+        }
+
+        public async Task CreateAsync(string name, string parentId, string filePath)
+        {
+            using (FileStream stream = File.OpenRead(filePath))
+            {
+                await _provider.CreateAsync(name, parentId, stream, PdfMimeType);
+            }
+        }
+
+        public async Task UpdateAsync(string fileId, string filePath)
+        {
+            using (FileStream stream = File.OpenRead(filePath))
+            {
+                await _provider.UpdateAsync(fileId, stream, PdfMimeType);
             }
         }
 
