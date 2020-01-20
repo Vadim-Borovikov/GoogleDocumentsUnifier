@@ -48,7 +48,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
             Task deletionTask = client.DeleteMessageAsync(message.Chat, botMessage.MessageId);
 
-            string text = updated ? "Готово" : "Раздатки уже актульны";
+            string text = updated ? "Готово" : "Раздатки уже актуальны";
             text += $". Ссылка на папку: {_targetUrl}";
 
             await client.SendTextMessageAsync(message.Chat, text, replyToMessageId: replyToMessageId);
