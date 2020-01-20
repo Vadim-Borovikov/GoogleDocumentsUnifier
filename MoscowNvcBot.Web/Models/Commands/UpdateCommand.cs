@@ -32,7 +32,7 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
             int replyToMessageId = 0;
-            // if (message.Chat.Type == ChatType.Group)
+            if (message.Chat.Type == ChatType.Group)
             {
                 replyToMessageId = message.MessageId;
             }
