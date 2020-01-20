@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
@@ -28,7 +29,12 @@ namespace MoscowNvcBot.Web.Models.Commands
                 builder.Append($"/{command.Name} – {command.Description}\n");
             }
 
-            await client.SendTextMessageAsync(message.Chat, builder.ToString());
+            int replyToMessageId = 0;
+            if (message.Chat.Type == ChatType.Group)
+            {
+                replyToMessageId = message.MessageId;
+            }
+            await client.SendTextMessageAsync(message.Chat, builder.ToString(), replyToMessageId: replyToMessageId);
         }
     }
 }

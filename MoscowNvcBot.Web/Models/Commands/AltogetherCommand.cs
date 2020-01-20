@@ -32,15 +32,20 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Task task = SendAllGooglePdfAsync(client, message.Chat);
+            int replyToMessageId = 0;
+            if (message.Chat.Type == ChatType.Group)
+            {
+                replyToMessageId = message.MessageId;
+            }
+            Task task = SendAllGooglePdfAsync(client, message.Chat, replyToMessageId);
             await WrapWithChatActionAsync(task, client, message.Chat, ChatAction.UploadDocument);
         }
 
-        private async Task SendAllGooglePdfAsync(ITelegramBotClient client, Chat chat)
+        private async Task SendAllGooglePdfAsync(ITelegramBotClient client, Chat chat, int replyToMessageId)
         {
             string path = await UnifyInfosAsync();
 
-            await SendFileAsync(client, chat, FileName, path);
+            await SendFileAsync(client, chat, FileName, path, replyToMessageId);
 
             System.IO.File.Delete(path);
         }
@@ -59,12 +64,17 @@ namespace MoscowNvcBot.Web.Models.Commands
             return new DocumentRequest(info);
         }
 
-        private static async Task SendFileAsync(ITelegramBotClient client, Chat chat, string fileName, string path)
+        private static async Task SendFileAsync(ITelegramBotClient client, Chat chat, string fileName, string path,
+            int replyToMessageId)
         {
             using (var fileStream = new FileStream(path, FileMode.Open))
             {
                 var pdf = new InputOnlineFile(fileStream, fileName);
-                await client.SendDocumentAsync(chat, pdf);
+                if (chat.Type == ChatType.Private)
+                {
+                    replyToMessageId = 0;
+                }
+                await client.SendDocumentAsync(chat, pdf, replyToMessageId: replyToMessageId);
             }
         }
 

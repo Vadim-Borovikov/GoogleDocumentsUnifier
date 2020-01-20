@@ -31,7 +31,14 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Task<Message> messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown);
+            int replyToMessageId = 0;
+            // if (message.Chat.Type == ChatType.Group)
+            {
+                replyToMessageId = message.MessageId;
+            }
+
+            Task<Message> messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown,
+                replyToMessageId: replyToMessageId);
 
             List<Task<bool>> tasks = _infos.Select(UpdateGooglePdfAsync).ToList();
             await Task.WhenAll(tasks);
@@ -44,7 +51,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             string text = updated ? "Готово" : "Раздатки уже актульны";
             text += $". Ссылка на папку: {_targetUrl}";
 
-            await client.SendTextMessageAsync(message.Chat, text);
+            await client.SendTextMessageAsync(message.Chat, text, replyToMessageId: replyToMessageId);
             await deletionTask;
         }
 
