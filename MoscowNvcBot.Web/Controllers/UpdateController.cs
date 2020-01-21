@@ -1,29 +1,18 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using MoscowNvcBot.Web.Models;
 using MoscowNvcBot.Web.Models.Commands;
 using MoscowNvcBot.Web.Models.Services;
 using Telegram.Bot.Types;
 
 namespace MoscowNvcBot.Web.Controllers
 {
-    [Route(BotConfiguration.Route)]
     public class UpdateController : Controller
     {
         private readonly IBotService _botService;
 
         public UpdateController(IBotService botService) { _botService = botService; }
 
-        // GET api/update
-        [HttpGet]
-        public async Task<IActionResult> Get()
-        {
-            User model = await _botService.Client.GetMeAsync();
-            return View(model);
-        }
-
-        // POST api/update
         [HttpPost]
         public async Task<OkResult> Post([FromBody]Update update)
         {

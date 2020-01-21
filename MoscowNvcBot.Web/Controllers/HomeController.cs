@@ -4,8 +4,11 @@ using MoscowNvcBot.Web.Models;
 
 namespace MoscowNvcBot.Web.Controllers
 {
+    [Route("")]
     public class HomeController : Controller
     {
+        [HttpGet]
+        [Route("")]
         public IActionResult Index() => View();
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
