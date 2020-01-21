@@ -33,7 +33,7 @@ namespace MoscowNvcBot.Web.Models.Services
             };
 
             Commands = commands.AsReadOnly();
-            var startCommand = new StartCommand(_config.StartMessagePrefix, Commands);
+            var startCommand = new StartCommand(Commands, _config.Host);
 
             commands.Insert(0, startCommand);
         }

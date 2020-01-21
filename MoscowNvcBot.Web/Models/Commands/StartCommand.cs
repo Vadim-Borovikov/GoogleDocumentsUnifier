@@ -12,22 +12,26 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "start";
         internal override string Description => "список команд";
 
-        private readonly string _startMessagePrefix;
         private readonly IReadOnlyList<Command> _commands;
+        private readonly string _url;
 
-        public StartCommand(string startMessagePrefix, IReadOnlyList<Command> commands)
+        public StartCommand(IReadOnlyList<Command> commands, string url)
         {
-            _startMessagePrefix = startMessagePrefix;
             _commands = commands;
+            _url = url;
         }
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            var builder = new StringBuilder(_startMessagePrefix);
+            var builder = new StringBuilder();
+            builder.AppendLine("Привет!");
+            builder.AppendLine();
             foreach (Command command in _commands)
             {
-                builder.Append($"/{command.Name} – {command.Description}\n");
+                builder.AppendLine($"/{command.Name} – {command.Description}");
             }
+            builder.AppendLine();
+            builder.AppendLine($"Иногда я засыпаю. Чтобы меня разбудить, зайдите на сайт {_url}.");
 
             int replyToMessageId = 0;
             if (message.Chat.Type == ChatType.Group)
