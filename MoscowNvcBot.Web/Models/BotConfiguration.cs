@@ -20,8 +20,6 @@ namespace MoscowNvcBot.Web.Models
 
         public string TargetPrefix { get; set; }
 
-        public const string Route = "api/update";
-
-        public string Url => $"{Host}:{Port}/{Route}";
+        public string Url => $"{Host}:{Port}";
     }
 }
