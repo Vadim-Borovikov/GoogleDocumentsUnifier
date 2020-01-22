@@ -31,7 +31,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 builder.AppendLine($"/{command.Name} – {command.Description}");
             }
             builder.AppendLine();
-            builder.AppendLine($"Иногда я засыпаю. Чтобы меня разбудить, зайдите на сайт {_url}.");
+            builder.AppendLine($"Иногда я засыпаю, но ты можешь меня разбудить, если зайдёшь на {_url}.");
 
             int replyToMessageId = 0;
             if (message.Chat.Type == ChatType.Group)
