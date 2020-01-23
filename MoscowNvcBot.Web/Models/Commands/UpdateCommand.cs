@@ -44,15 +44,11 @@ namespace MoscowNvcBot.Web.Models.Commands
             await Task.WhenAll(tasks);
             bool updated = tasks.Select(t => t.Result).Any(r => r);
 
-            Message botMessage = await messageTask;
-
-            Task deletionTask = client.DeleteMessageAsync(message.Chat, botMessage.MessageId);
-
             string text = updated ? "Готово" : "Раздатки уже актуальны";
             text += $". Ссылка на папку: {_targetUrl}";
 
+            await messageTask;
             await client.SendTextMessageAsync(message.Chat, text, replyToMessageId: replyToMessageId);
-            await deletionTask;
         }
 
         private async Task<bool> UpdateGooglePdfAsync(DocumentInfo info)
