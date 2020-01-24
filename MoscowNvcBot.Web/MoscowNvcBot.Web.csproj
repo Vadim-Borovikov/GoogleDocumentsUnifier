@@ -23,4 +23,11 @@
     <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <None Update="unifying.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

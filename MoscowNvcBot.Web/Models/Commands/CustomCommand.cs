@@ -22,14 +22,17 @@ namespace MoscowNvcBot.Web.Models.Commands
         private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
         private readonly string _sourcesUrl;
+        private readonly InputOnlineFile _unifying;
         private readonly DataManager _googleDataManager;
 
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
-        public CustomCommand(string sourcesUrl, DataManager googleDataManager)
+
+        public CustomCommand(string sourcesUrl, string unifyingId, DataManager googleDataManager)
         {
             _sourcesUrl = sourcesUrl;
+            _unifying = new InputOnlineFile(unifyingId);
             _googleDataManager = googleDataManager;
         }
 
@@ -147,10 +150,9 @@ namespace MoscowNvcBot.Web.Models.Commands
             List<Task<TempFile>> tasks = files.Select(f => f.DownloadTask).ToList();
 
             List<Task<TempFile>> runningTasks = tasks.Where(t => t.Status == TaskStatus.Running).ToList();
-            Task<Message> messageTask;
             if (runningTasks.Any())
             {
-                messageTask = client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
+                Task<Message> messageTask = client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
                 await Task.WhenAll(runningTasks);
                 await messageTask;
             }
@@ -162,7 +164,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return;
             }
 
-            messageTask = client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
+            await client.SendPhotoAsync(chatId, _unifying);
 
             using (var temp = new TempFile())
             {
@@ -172,7 +174,6 @@ namespace MoscowNvcBot.Web.Models.Commands
                 using (var fileStream = new FileStream(temp.File.FullName, FileMode.Open))
                 {
                     var pdf = new InputOnlineFile(fileStream, "Раздатки.pdf");
-                    await messageTask;
                     await chatActionTask;
                     await client.SendDocumentAsync(chatId, pdf);
                 }

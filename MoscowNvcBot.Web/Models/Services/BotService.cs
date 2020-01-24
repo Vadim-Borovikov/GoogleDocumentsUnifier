@@ -28,7 +28,7 @@ namespace MoscowNvcBot.Web.Models.Services
 
             var commands = new List<Command>
             {
-                new CustomCommand(_config.FolderId, _googleDataManager),
+                new CustomCommand(_config.FolderId, _config.UnifyingId, _googleDataManager),
                 new UpdateCommand(_config.Sources, _config.FolderId, _config.TargetPrefix, _googleDataManager)
             };
 

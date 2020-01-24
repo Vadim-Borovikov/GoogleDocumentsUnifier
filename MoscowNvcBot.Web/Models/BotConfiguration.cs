@@ -16,6 +16,8 @@ namespace MoscowNvcBot.Web.Models
 
         public string FolderId { get; set; }
 
+        public string UnifyingId { get; set; }
+
         public string TargetPrefix { get; set; }
 
         public string Url => $"{Host}:{Port}/{Token}";
