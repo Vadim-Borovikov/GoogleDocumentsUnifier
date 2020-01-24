@@ -55,7 +55,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
                 Task<TempFile> downloadTask = DownloadToTempAsync(docInfo);
 
-                var fileData = new CustomCommandFileData(downloadTask);
+                var fileData = new GoogleFileData(downloadTask);
                 data.Files.Add(name, fileData);
 
                 bool isLast = info == last;
@@ -140,7 +140,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private async Task GenerateAndSendAsync(ITelegramBotClient client, long chatId, CustomCommandData data)
         {
-            List<CustomCommandFileData> files = data.Files.Values.Where(f => f.Amount > 0).ToList();
+            List<GoogleFileData> files = data.Files.Values.Where(f => f.Amount > 0).ToList();
             if (!files.Any())
             {
                 await client.SendTextMessageAsync(chatId, "Ничего не выбрано!");
@@ -205,7 +205,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             return InlineKeyboardButton.WithCallbackData(text, callBackData);
         }
 
-        private static DocumentRequest CreateRequest(CustomCommandFileData data)
+        private static DocumentRequest CreateRequest(GoogleFileData data)
         {
             string path = data.DownloadTask.Result.File.FullName;
             return new DocumentRequest(path, data.Amount);

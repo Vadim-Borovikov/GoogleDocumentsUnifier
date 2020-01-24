@@ -1,14 +1,14 @@
 ﻿using System.Threading.Tasks;
 using GoogleDocumentsUnifier.Logic;
 
-namespace MoscowNvcBot.Web.Models.Commands
+namespace MoscowNvcBot.Web.Models
 {
-    internal class CustomCommandFileData
+    internal class GoogleFileData
     {
         public readonly Task<TempFile> DownloadTask;
         public uint Amount;
 
-        public CustomCommandFileData(Task<TempFile> downloadTask)
+        public GoogleFileData(Task<TempFile> downloadTask)
         {
             DownloadTask = downloadTask;
         }
