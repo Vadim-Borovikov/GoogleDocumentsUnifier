@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MoscowNvcBot.Web.Models.Commands;
 using MoscowNvcBot.Web.Models.Services;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 
 namespace MoscowNvcBot.Web.Controllers
 {
@@ -18,12 +19,27 @@ namespace MoscowNvcBot.Web.Controllers
         {
             if (update != null)
             {
-                Message message = update.Message;
-
-                Command command = _botService.Commands.FirstOrDefault(c => c.Contains(message));
-                if (command != null)
+                Command command;
+                switch (update.Type)
                 {
-                    await command.ExecuteAsync(message, _botService.Client);
+                    case UpdateType.Message:
+                        Message message = update.Message;
+
+                        command = _botService.Commands.FirstOrDefault(c => c.Contains(message));
+                        if (command != null)
+                        {
+                            await command.ExecuteAsync(message, _botService.Client);
+                        }
+                        break;
+                    case UpdateType.CallbackQuery:
+                        CallbackQuery query = update.CallbackQuery;
+
+                        command = _botService.Commands.FirstOrDefault(c => query.Data.Contains(c.Name));
+                        if (command != null)
+                        {
+                            await command.InvokeAsync(query, _botService.Client);
+                        }
+                        break;
                 }
             }
 

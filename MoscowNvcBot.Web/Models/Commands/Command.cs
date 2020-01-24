@@ -13,5 +13,7 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal bool Contains(Message message) => (message.Type == MessageType.Text) && message.Text.Contains(Name);
 
         internal abstract Task ExecuteAsync(Message message, ITelegramBotClient client);
+
+        internal virtual Task InvokeAsync(CallbackQuery query, ITelegramBotClient client) =>  Task.CompletedTask;
     }
 }

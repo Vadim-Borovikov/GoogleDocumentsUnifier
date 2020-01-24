@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MoscowNvcBot.Web", "MoscowN
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleDocumentsUnifier.Logic", "GoogleDocumentsUnifier.Logic\GoogleDocumentsUnifier.Logic.csproj", "{4038923E-ABAD-4364-82EE-FD42DC21D45E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Logic.Tests", "GoogleDocumentsUnifier.Logic.Tests\GoogleDocumentsUnifier.Logic.Tests.csproj", "{6D8AE602-3BD9-4E22-994F-CD6A92924365}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleDocumentsUnifier.Logic.Tests", "GoogleDocumentsUnifier.Logic.Tests\GoogleDocumentsUnifier.Logic.Tests.csproj", "{6D8AE602-3BD9-4E22-994F-CD6A92924365}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
