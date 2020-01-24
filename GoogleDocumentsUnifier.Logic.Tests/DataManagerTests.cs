@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoogleDocumentsUnifier.Logic.Tests
@@ -28,31 +30,37 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         }
 
         [TestMethod]
-        public async Task UnifyTest()
+        public async Task GetFilesInFolderTest()
         {
-            var pdf1 = new DocumentInfo(TestsConfiguration.Instance.Pdf1Path, DocumentType.LocalPdf);
-            var pdf2 = new DocumentInfo(TestsConfiguration.Instance.Pdf2Path, DocumentType.LocalPdf);
-            var requests = new[]
-            {
-                new DocumentRequest(pdf1, 1),
-                new DocumentRequest(pdf2, 1)
-            };
-            int pages = TestsConfiguration.Instance.Pdf1Pages + TestsConfiguration.Instance.Pdf2Pages;
             using (DataManager dataManager = CreateDataManager())
             {
-                using (var temp = new TempFile())
+                IEnumerable<FileInfo> infos =
+                    await dataManager.GetFilesInFolderAsync(TestsConfiguration.Instance.PdfParentId);
+                Assert.AreEqual(TestsConfiguration.Instance.PdfParentChildrenAmount, infos.Count());
+            }
+        }
+
+        [TestMethod]
+        public void UnifyTest()
+        {
+            var requests = new[]
+            {
+                new DocumentRequest(TestsConfiguration.Instance.Pdf1Path, 1),
+                new DocumentRequest(TestsConfiguration.Instance.Pdf2Path, 1)
+            };
+            int pages = TestsConfiguration.Instance.Pdf1Pages + TestsConfiguration.Instance.Pdf2Pages;
+            using (var temp = new TempFile())
+            {
+                DataManager.Unify(requests, temp.File.FullName);
+                using (Pdf pdf = Pdf.CreateReader(temp.File.FullName))
                 {
-                    await dataManager.UnifyAsync(requests, temp.File.FullName);
-                    using (Pdf pdf = Pdf.CreateReader(temp.File.FullName))
-                    {
-                        Assert.AreEqual(pages, pdf.GetPagesAmount());
-                    }
+                    Assert.AreEqual(pages, pdf.GetPagesAmount());
                 }
             }
         }
 
         [TestMethod]
-        public async Task UpdateAndCopyTest()
+        public async Task UpdateAndDownloadTest()
         {
             using (DataManager dataManager = CreateDataManager())
             {
@@ -84,11 +92,10 @@ namespace GoogleDocumentsUnifier.Logic.Tests
 
         private static async Task CheckGooglePdf(DataManager dataManager, string id, int pages)
         {
-            var info = new DocumentInfo(id, DocumentType.GooglePdf);
-            var request = new DocumentRequest(info, 1);
+            var info = new DocumentInfo(id, DocumentType.Pdf);
             using (var temp = new TempFile())
             {
-                await dataManager.CopyAsync(request, temp.File.FullName);
+                await dataManager.DownloadAsync(info, temp.File.FullName);
                 CheckLocalPdf(temp.File, pages);
             }
         }

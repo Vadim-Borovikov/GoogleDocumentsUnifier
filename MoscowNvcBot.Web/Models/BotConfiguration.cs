@@ -14,7 +14,7 @@ namespace MoscowNvcBot.Web.Models
 
         public List<string> Sources { get; set; }
 
-        public string TargetId { get; set; }
+        public string FolderId { get; set; }
 
         public string TargetPrefix { get; set; }
 

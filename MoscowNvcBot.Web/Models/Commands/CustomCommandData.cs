@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using GoogleDocumentsUnifier.Logic;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
-    public class CustomCommandData
+    internal class CustomCommandData
     {
-        public readonly Dictionary<string, DocumentRequest> Documents = new Dictionary<string, DocumentRequest>();
+        public readonly Dictionary<string, CustomCommandFileData> Files =
+            new Dictionary<string, CustomCommandFileData>();
     }
 }

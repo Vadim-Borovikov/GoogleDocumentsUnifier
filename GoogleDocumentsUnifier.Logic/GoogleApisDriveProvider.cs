@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,18 +45,21 @@ namespace GoogleDocumentsUnifier.Logic
         public async Task<FileInfo> GetFileInfoAsync(string id)
         {
             FilesResource.GetRequest request = _driveService.Files.Get(id);
-            request.Fields = "id, name, modifiedTime";
+            request.Fields = GetFields;
             File file = await request.ExecuteAsync();
             return GetInfo(file);
         }
 
-        public async Task<FileInfo> FindFileInFolderAsync(string target, string pdfName)
+        public async Task<IEnumerable<FileInfo>> FindFilesInFolderAsync(string parent, string name)
         {
-            FilesResource.ListRequest request = _driveService.Files.List();
-            request.Q = $"'{target}' in parents and name = '{pdfName}'";
-            request.Fields = "files(id, name, modifiedTime)";
-            FileList files = await request.ExecuteAsync();
-            return files.Files.Count > 0 ? GetInfo(files.Files.First()) : null;
+            string query = $"'{parent}' in parents and name = '{name}'";
+            return await ListFilesAsync(query);
+        }
+
+        public async Task<IEnumerable<FileInfo>> GetFilesInFolder(string parent)
+        {
+            string query = $"'{parent}' in parents";
+            return await ListFilesAsync(query);
         }
 
         public async Task<IUploadProgress> CreateAsync(string name, string parent, FileStream stream,
@@ -79,8 +83,20 @@ namespace GoogleDocumentsUnifier.Logic
 
         private static FileInfo GetInfo(File file) => new FileInfo(file.Id, file.Name, file.ModifiedTime);
 
-        private static readonly string[] Scopes = { DriveService.Scope.Drive };
+        private async Task<IEnumerable<FileInfo>> ListFilesAsync(string query)
+        {
+            FilesResource.ListRequest request = _driveService.Files.List();
+            request.Q = query;
+            request.Fields = ListFields;
+            FileList fileList = await request.ExecuteAsync();
+            return fileList.Files.Select(GetInfo);
+        }
+
         private const string ApplicationName = "GoogleApisDriveProvider";
+        private const string GetFields = "id, name, modifiedTime";
+
+        private static readonly string[] Scopes = { DriveService.Scope.Drive };
+        private static readonly string ListFields = $"files({GetFields})";
 
         private readonly DriveService _driveService;
     }

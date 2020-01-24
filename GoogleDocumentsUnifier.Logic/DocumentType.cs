@@ -2,9 +2,7 @@
 {
     public enum DocumentType
     {
-        LocalPdf,
-        WebPdf,
-        GooglePdf,
-        GoogleDocument
+        Document,
+        Pdf
     }
 }

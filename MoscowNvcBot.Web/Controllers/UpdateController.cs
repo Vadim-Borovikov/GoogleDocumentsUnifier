@@ -37,7 +37,8 @@ namespace MoscowNvcBot.Web.Controllers
                         command = _botService.Commands.FirstOrDefault(c => query.Data.Contains(c.Name));
                         if (command != null)
                         {
-                            await command.InvokeAsync(query, _botService.Client);
+                            string queryData = query.Data.Replace(command.Name, "");
+                            await command.InvokeAsync(query.Message, _botService.Client, queryData);
                         }
                         break;
                 }

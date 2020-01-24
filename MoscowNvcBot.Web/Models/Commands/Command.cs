@@ -14,6 +14,9 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal abstract Task ExecuteAsync(Message message, ITelegramBotClient client);
 
-        internal virtual Task InvokeAsync(CallbackQuery query, ITelegramBotClient client) =>  Task.CompletedTask;
+        internal virtual Task InvokeAsync(Message message, ITelegramBotClient client, string data)
+        {
+            return Task.CompletedTask;
+        }
     }
 }

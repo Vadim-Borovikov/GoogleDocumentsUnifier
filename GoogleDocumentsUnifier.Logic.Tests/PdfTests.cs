@@ -11,7 +11,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
             using (Pdf pdf = Pdf.CreateReader(TestsConfiguration.Instance.Pdf2Path))
             {
                 Assert.IsNotNull(pdf);
-                Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
+                Assert.AreEqual(TestsConfiguration.Instance.Pdf2Pages, pdf.GetPagesAmount());
             }
         }
 
@@ -25,12 +25,10 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                     using (Pdf other = Pdf.CreateReader(TestsConfiguration.Instance.Pdf2Path))
                     {
                         pdf.AddAllPages(other);
-                        Assert.AreEqual(PagesAmount, pdf.GetPagesAmount());
+                        Assert.AreEqual(TestsConfiguration.Instance.Pdf2Pages, pdf.GetPagesAmount());
                     }
                 }
             }
         }
-
-        private const int PagesAmount = 2;
     }
 }

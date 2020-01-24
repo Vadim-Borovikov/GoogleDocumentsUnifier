@@ -19,17 +19,17 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "custom";
         internal override string Description => "выбрать и объединить раздатки";
 
-        private static readonly int[] Amounts = { 0, 1, 5, 10, 20 };
+        private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
-        private readonly List<string> _sources;
+        private readonly string _sourcesUrl;
         private readonly DataManager _googleDataManager;
 
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
-        public CustomCommand(List<string> sources, DataManager googleDataManager)
+        public CustomCommand(string sourcesUrl, DataManager googleDataManager)
         {
-            _sources = sources;
+            _sourcesUrl = sourcesUrl;
             _googleDataManager = googleDataManager;
         }
 
@@ -37,49 +37,53 @@ namespace MoscowNvcBot.Web.Models.Commands
         {
             Task messageTask = SendFirstMessageAsync(message, client);
 
-            List<string> names = await GetNamesAsync();
+            IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_sourcesUrl);
+            List<FileInfo> infosList = infos.ToList();
+
+            CustomCommandData data = CreateOrClearData(message.Chat.Id);
+            FileInfo last = infosList.Last();
 
             await messageTask;
 
-            var data = new CustomCommandData();
-            for (int i = 0; i < _sources.Count; ++i)
+            foreach (FileInfo info in infosList)
             {
-                var info = new DocumentInfo(_sources[i], DocumentType.GoogleDocument);
-                var request = new DocumentRequest(info, 0);
+                string name = Path.GetFileNameWithoutExtension(info.Name);
+                var docInfo = new DocumentInfo(info.Id, DocumentType.Pdf);
 
-                data.Documents.Add(names[i], request);
+                Task<TempFile> downloadTask = DownloadToTempAsync(docInfo);
 
-                bool isLast = i == (_sources.Count - 1);
-                InlineKeyboardMarkup keyboard = GetKeyboard(request, isLast);
-                await client.SendTextMessageAsync(message.Chat, names[i], disableNotification: !isLast,
+                var fileData = new CustomCommandFileData(downloadTask);
+                data.Files.Add(name, fileData);
+
+                bool isLast = info == last;
+                InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
+                await client.SendTextMessageAsync(message.Chat, name, disableNotification: !isLast,
                     replyMarkup: keyboard);
             }
-
-            ChatData.AddOrUpdate(message.Chat.Id, data, (l, d) => d);
         }
 
-        internal override async Task InvokeAsync(CallbackQuery query, ITelegramBotClient client)
+        internal override async Task InvokeAsync(Message message, ITelegramBotClient client, string data)
         {
-            long chatId = query.Message.Chat.Id;
-            bool success = ChatData.TryGetValue(chatId, out CustomCommandData data);
+            long chatId = message.Chat.Id;
+            bool success = ChatData.TryGetValue(chatId, out CustomCommandData commandData);
             if (!success)
             {
                 throw new Exception("Couldn't get data from ConcurrentDictionary!");
             }
-            string queryData = query.Data.Replace(Name, "");
-            if (queryData == "")
+            if (data == "")
             {
-                await GenerateAndSendAsync(client, chatId, data);
+                await GenerateAndSendAsync(client, chatId, commandData);
+                ClearData(commandData);
             }
             else
             {
-                success = uint.TryParse(queryData, out uint amount);
+                success = uint.TryParse(data, out uint amount);
                 if (!success)
                 {
                     throw new Exception("Couldn't get amount from query.Data!");
                 }
 
-                await UpdateAmountAsync(client, chatId, query.Message, data, amount);
+                await UpdateAmountAsync(client, chatId, message, commandData, amount);
             }
         }
 
@@ -94,16 +98,32 @@ namespace MoscowNvcBot.Web.Models.Commands
                 disableNotification: true, replyToMessageId: replyToMessageId);
         }
 
-        private async Task<List<string>> GetNamesAsync()
+        private static CustomCommandData CreateOrClearData(long chatId)
         {
-            List<Task<FileInfo>> tasks = _sources.Select(_googleDataManager.GetFileInfoAsync).ToList();
-            await Task.WhenAll(tasks);
-            return tasks.Select(t => t.Result.Name).ToList();
+            bool found = ChatData.TryGetValue(chatId, out CustomCommandData data);
+            if (found)
+            {
+                ClearData(data);
+            }
+            else
+            {
+                data = new CustomCommandData();
+            }
+
+            ChatData.AddOrUpdate(chatId, data, (l, d) => d);
+            return data;
         }
 
-        private InlineKeyboardMarkup GetKeyboard(DocumentRequest request, bool isLast)
+        private async Task<TempFile> DownloadToTempAsync(DocumentInfo info)
         {
-            IEnumerable<InlineKeyboardButton> amountRow = Amounts.Select(a => GetAmountButton(a, request.Amount == a));
+            var temp = new TempFile();
+            await _googleDataManager.DownloadAsync(info, temp.File.FullName);
+            return temp;
+        }
+
+        private InlineKeyboardMarkup GetKeyboard(uint amount, bool isLast)
+        {
+            IEnumerable<InlineKeyboardButton> amountRow = Amounts.Select(a => GetAmountButton(a, amount == a));
             if (!isLast)
             {
                 return new InlineKeyboardMarkup(amountRow);
@@ -115,58 +135,79 @@ namespace MoscowNvcBot.Web.Models.Commands
             return new InlineKeyboardMarkup(rows);
         }
 
-        private InlineKeyboardButton GetAmountButton(int amount, bool selected)
-        {
-            string text = selected ? $"• {amount} •" : $"{amount}";
-            string callBackData = $"{Name}{amount}";
-            return InlineKeyboardButton.WithCallbackData(text, callBackData);
-        }
-
         private async Task GenerateAndSendAsync(ITelegramBotClient client, long chatId, CustomCommandData data)
         {
-            List<DocumentRequest> requests = data.Documents.Values.ToList();
-            if (requests.TrueForAll(r => r.Amount == 0))
+            List<CustomCommandFileData> files = data.Files.Values.Where(f => f.Amount > 0).ToList();
+            if (!files.Any())
             {
                 await client.SendTextMessageAsync(chatId, "Ничего не выбрано!");
                 return;
             }
 
-            Task<Message> messageTask = client.SendTextMessageAsync(chatId, "_Готовлю..._", ParseMode.Markdown);
+            List<Task<TempFile>> tasks = files.Select(f => f.DownloadTask).ToList();
 
-            string path = await UnifyRequestsAsync(requests);
-
-            Task chatActionTask = client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
-            using (var fileStream = new FileStream(path, FileMode.Open))
+            List<Task<TempFile>> runningTasks = tasks.Where(t => t.Status == TaskStatus.Running).ToList();
+            Task<Message> messageTask;
+            if (runningTasks.Any())
             {
-                var pdf = new InputOnlineFile(fileStream, "Раздатки.pdf");
+                messageTask = client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
+                await Task.WhenAll(runningTasks);
                 await messageTask;
-                await chatActionTask;
-                await client.SendDocumentAsync(chatId, pdf);
             }
 
-            System.IO.File.Delete(path);
+            if (tasks.Any(t => t.Status != TaskStatus.RanToCompletion))
+            {
+                await client.SendTextMessageAsync(chatId,
+                    $"Ой, что-то не вышло! Попробуй ещё раз, пожалуйста: /{Name}");
+                return;
+            }
+
+            messageTask = client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
+
+            using (var temp = new TempFile())
+            {
+                DataManager.Unify(files.Select(CreateRequest), temp.File.FullName);
+
+                Task chatActionTask = client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
+                using (var fileStream = new FileStream(temp.File.FullName, FileMode.Open))
+                {
+                    var pdf = new InputOnlineFile(fileStream, "Раздатки.pdf");
+                    await messageTask;
+                    await chatActionTask;
+                    await client.SendDocumentAsync(chatId, pdf);
+                }
+            }
         }
 
         private async Task UpdateAmountAsync(ITelegramBotClient client, long chatId, Message message,
             CustomCommandData data, uint amount)
         {
             string name = message.Text;
-            DocumentRequest request = data.Documents[name];
 
-            request.Amount = amount;
+            data.Files[name].Amount = amount;
 
             bool isLast = message.ReplyMarkup.InlineKeyboard.Count() == 2;
-            InlineKeyboardMarkup keyboard = GetKeyboard(request, isLast);
+            InlineKeyboardMarkup keyboard = GetKeyboard(amount, isLast);
             await client.EditMessageTextAsync(chatId, message.MessageId, name, replyMarkup: keyboard);
         }
 
-        private async Task<string> UnifyRequestsAsync(IEnumerable<DocumentRequest> requests)
+        private static void ClearData(CustomCommandData data)
         {
-            string path = Path.GetTempFileName();
+            Parallel.ForEach(data.Files.Values.Select(f => f.DownloadTask), t => t.Result.Dispose());
+            data.Files.Clear();
+        }
 
-            await _googleDataManager.UnifyAsync(requests, path);
+        private InlineKeyboardButton GetAmountButton(uint amount, bool selected)
+        {
+            string text = selected ? $"• {amount} •" : $"{amount}";
+            string callBackData = $"{Name}{amount}";
+            return InlineKeyboardButton.WithCallbackData(text, callBackData);
+        }
 
-            return path;
+        private static DocumentRequest CreateRequest(CustomCommandFileData data)
+        {
+            string path = data.DownloadTask.Result.File.FullName;
+            return new DocumentRequest(path, data.Amount);
         }
     }
 }

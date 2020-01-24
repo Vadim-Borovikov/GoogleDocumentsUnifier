@@ -1,13 +1,11 @@
-﻿using GoogleDocumentsUnifier.Logic;
+﻿using System;
+using GoogleDocumentsUnifier.Logic;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using File = System.IO.File;
-using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
@@ -21,7 +19,8 @@ namespace MoscowNvcBot.Web.Models.Commands
         private readonly string _targetUrl;
         private readonly DataManager _googleDataManager;
 
-        public UpdateCommand(IEnumerable<string> sources, string targetId, string targetPrefix, DataManager googleDataManager)
+        public UpdateCommand(IEnumerable<string> sources, string targetId, string targetPrefix,
+            DataManager googleDataManager)
         {
             _infos = sources.Select(CreateInfo);
             _targetId = targetId;
@@ -58,46 +57,32 @@ namespace MoscowNvcBot.Web.Models.Commands
             string pdfName = $"{fileInfo.Name}.pdf";
             FileInfo pdfInfo = await _googleDataManager.FindFileInFolderAsync(_targetId, pdfName);
 
-            if (pdfInfo == null)
+            using (var temp = new TempFile())
             {
-                await CreateAsync(info, pdfName);
+                await _googleDataManager.DownloadAsync(info, temp.File.FullName);
+
+                return await UploadAsync(temp.File.FullName, fileInfo.ModifiedTime, pdfName, pdfInfo);
+            }
+        }
+
+        private async Task<bool> UploadAsync(string sourcePath, DateTime? sourceMoifiedTime, string name,
+            FileInfo target)
+        {
+            if (target == null)
+            {
+                await _googleDataManager.CreateAsync(name, _targetId, sourcePath);
                 return true;
             }
 
-            if (pdfInfo.ModifiedTime < fileInfo.ModifiedTime)
+            if (target.ModifiedTime < sourceMoifiedTime)
             {
-                await UpdateAsync(info, pdfInfo.Id);
+                await _googleDataManager.UpdateAsync(target.Id, sourcePath);
                 return true;
             }
 
             return false;
         }
 
-        private async Task CreateAsync(DocumentInfo info, string name)
-        {
-            string path = await DownloadAsync(info);
-            await _googleDataManager.CreateAsync(name, _targetId, path);
-            File.Delete(path);
-        }
-
-        private async Task UpdateAsync(DocumentInfo info, string pdfId)
-        {
-            string path = await DownloadAsync(info);
-            await _googleDataManager.UpdateAsync(pdfId, path);
-            File.Delete(path);
-        }
-
-        private async Task<string> DownloadAsync(DocumentInfo info)
-        {
-            var request = new DocumentRequest(info, 1);
-            string path = Path.GetTempFileName();
-            await _googleDataManager.CopyAsync(request, path);
-            return path;
-        }
-
-        private static DocumentInfo CreateInfo(string source)
-        {
-            return new DocumentInfo(source, DocumentType.GoogleDocument);
-        }
+        private static DocumentInfo CreateInfo(string source) => new DocumentInfo(source, DocumentType.Document);
     }
 }
