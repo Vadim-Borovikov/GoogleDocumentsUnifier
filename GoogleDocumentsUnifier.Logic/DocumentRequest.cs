@@ -2,8 +2,9 @@
 {
     public class DocumentRequest
     {
-        internal readonly DocumentInfo Info;
         public uint Amount;
+
+        internal readonly DocumentInfo Info;
 
         public DocumentRequest(DocumentInfo info, uint amount)
         {

@@ -8,21 +8,15 @@ namespace GoogleDocumentsUnifier.Logic
 {
     public class DataManager : IDisposable
     {
-        public DataManager(string projectJson)
-        {
-            _provider = new GoogleApisDriveProvider(projectJson);
-        }
+        public DataManager(string projectJson) { _provider = new GoogleApisDriveProvider(projectJson); }
 
-        public void Dispose()
-        {
-            _provider.Dispose();
-        }
+        public void Dispose() { _provider.Dispose(); }
 
         public async Task<FileInfo> GetFileInfoAsync(string id) => await _provider.GetFileInfoAsync(id);
 
-        public async Task<FileInfo> FindFileInFolderAsync(string target, string pdfName)
+        public async Task<FileInfo> FindFileInFolderAsync(string parent, string name)
         {
-            return await _provider.FindFileInFolderAsync(target, pdfName);
+            return await _provider.FindFileInFolderAsync(parent, name);
         }
 
         public async Task CopyAsync(DocumentRequest request, string resultPath)
@@ -122,6 +116,7 @@ namespace GoogleDocumentsUnifier.Logic
         }
 
         private const string PdfMimeType = "application/pdf";
+
         private readonly GoogleApisDriveProvider _provider;
     }
 }
