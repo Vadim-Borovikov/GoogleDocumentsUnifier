@@ -89,7 +89,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private async Task<string> DownloadAsync(DocumentInfo info)
         {
-            var request = new DocumentRequest(info);
+            var request = new DocumentRequest(info, 1);
             string path = Path.GetTempFileName();
             await _googleDataManager.CopyAsync(request, path);
             return path;

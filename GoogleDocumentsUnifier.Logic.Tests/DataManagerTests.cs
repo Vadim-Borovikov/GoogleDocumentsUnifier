@@ -15,8 +15,8 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 var pdf2 = new DocumentInfo(TestsConfiguration.Instance.Pdf2Path, DocumentType.LocalPdf);
                 var requests = new[]
                 {
-                    new DocumentRequest(pdf1),
-                    new DocumentRequest(pdf2)
+                    new DocumentRequest(pdf1, 1),
+                    new DocumentRequest(pdf2, 1)
                 };
                 using (var temp = new TempFile())
                 {

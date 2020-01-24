@@ -5,7 +5,7 @@
         public readonly DocumentInfo Info;
         internal readonly uint Amount;
 
-        public DocumentRequest(DocumentInfo info, uint amount = 1)
+        public DocumentRequest(DocumentInfo info, uint amount)
         {
             Info = info;
             Amount = amount;
