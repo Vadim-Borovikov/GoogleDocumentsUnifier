@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 
-namespace GoogleDocumentsUnifier.Logic.Tests
+namespace GoogleDocumentsUnifier.Logic
 {
-    internal class TempFile : IDisposable
+    public class TempFile : IDisposable
     {
         public readonly System.IO.FileInfo File;
 

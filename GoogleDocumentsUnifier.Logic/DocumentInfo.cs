@@ -3,7 +3,8 @@
     public class DocumentInfo
     {
         public readonly string Id;
-        public readonly DocumentType DocumentType;
+
+        internal readonly DocumentType DocumentType;
 
         public DocumentInfo(string id, DocumentType documentType)
         {

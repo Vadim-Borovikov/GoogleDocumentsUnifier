@@ -242,8 +242,4 @@ ModelManifest.xml
 .fake/
 /GoogleDocumentsUnifier.Logic.Tests/Keys/project.json
 /MoscowNvcBot.Web/appsettings.Development.json
-/MoscowNvcBot.Console.Legacy/Keys/project.json
-/MoscowNvcBot.Console.Legacy/Keys/token.txt
-/GoogleDocumentsUnifier.Logic.Tests.Legacy/Keys/project.json
-/GoogleDocumentsUnifier.Legacy/Keys/project.json
-/GoogleDocumentsUnifier.Logic.Tests/appsettings.Development.json
+/GoogleDocumentsUnifier.Logic.Tests/project.json

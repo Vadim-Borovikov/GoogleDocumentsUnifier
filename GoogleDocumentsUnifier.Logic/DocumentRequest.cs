@@ -2,12 +2,12 @@
 {
     public class DocumentRequest
     {
-        public readonly DocumentInfo Info;
+        internal readonly string Path;
         internal readonly uint Amount;
 
-        public DocumentRequest(DocumentInfo info, uint amount = 1)
+        public DocumentRequest(string path, uint amount)
         {
-            Info = info;
+            Path = path;
             Amount = amount;
         }
     }
