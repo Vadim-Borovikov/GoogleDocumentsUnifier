@@ -36,8 +36,6 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            await client.SendTextMessageAsync(message.Chat, "Hello world!");
-
             Task<Message> messageTask = SendFirstMessageAsync(message, client);
 
             IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_sourcesUrl);
