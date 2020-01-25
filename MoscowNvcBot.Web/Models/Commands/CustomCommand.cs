@@ -38,15 +38,16 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Task messageTask = SendFirstMessageAsync(message, client);
+            Task<Message> messageTask = SendFirstMessageAsync(message, client);
 
             IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_sourcesUrl);
             List<FileInfo> infosList = infos.ToList();
 
-            CustomCommandData data = CreateOrClearData(message.Chat.Id);
+            CustomCommandData data = await CreateOrClearDataAsync(client, message.Chat.Id);
             FileInfo last = infosList.Last();
 
             await messageTask;
+            data.MessageIds.Add(messageTask.Result.MessageId);
 
             foreach (FileInfo info in infosList)
             {
@@ -60,8 +61,9 @@ namespace MoscowNvcBot.Web.Models.Commands
 
                 bool isLast = info == last;
                 InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
-                await client.SendTextMessageAsync(message.Chat, name, disableNotification: !isLast,
-                    replyMarkup: keyboard);
+                Message chatMessage = await client.SendTextMessageAsync(message.Chat, name,
+                    disableNotification: !isLast, replyMarkup: keyboard);
+                data.MessageIds.Add(chatMessage.MessageId);
             }
         }
 
@@ -73,10 +75,11 @@ namespace MoscowNvcBot.Web.Models.Commands
             {
                 throw new Exception("Couldn't get data from ConcurrentDictionary!");
             }
+
             if (data == "")
             {
                 await GenerateAndSendAsync(client, chatId, commandData);
-                ClearData(commandData);
+                await commandData.Clear(client, message.Chat.Id);
             }
             else
             {
@@ -90,23 +93,23 @@ namespace MoscowNvcBot.Web.Models.Commands
             }
         }
 
-        private static async Task SendFirstMessageAsync(Message message, ITelegramBotClient client)
+        private static async Task<Message> SendFirstMessageAsync(Message message, ITelegramBotClient client)
         {
             int replyToMessageId = 0;
             if (message.Chat.Type == ChatType.Group)
             {
                 replyToMessageId = message.MessageId;
             }
-            await client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
+            return await client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
                 disableNotification: true, replyToMessageId: replyToMessageId);
         }
 
-        private static CustomCommandData CreateOrClearData(long chatId)
+        private static async Task<CustomCommandData> CreateOrClearDataAsync(ITelegramBotClient client, long chatId)
         {
             bool found = ChatData.TryGetValue(chatId, out CustomCommandData data);
             if (found)
             {
-                ClearData(data);
+                await data.Clear(client, chatId);
             }
             else
             {
@@ -190,12 +193,6 @@ namespace MoscowNvcBot.Web.Models.Commands
             bool isLast = message.ReplyMarkup.InlineKeyboard.Count() == 2;
             InlineKeyboardMarkup keyboard = GetKeyboard(amount, isLast);
             await client.EditMessageTextAsync(chatId, message.MessageId, name, replyMarkup: keyboard);
-        }
-
-        private static void ClearData(CustomCommandData data)
-        {
-            Parallel.ForEach(data.Files.Values.Select(f => f.DownloadTask), t => t.Result.Dispose());
-            data.Files.Clear();
         }
 
         private InlineKeyboardButton GetAmountButton(uint amount, bool selected)
