@@ -78,8 +78,11 @@ namespace MoscowNvcBot.Web.Models.Commands
 
             if (data == "")
             {
-                await GenerateAndSendAsync(client, chatId, commandData);
-                await commandData.Clear(client, message.Chat.Id);
+                bool shouldCleanup = await GenerateAndSendAsync(client, chatId, commandData);
+                if (shouldCleanup)
+                {
+                    await commandData.Clear(client, message.Chat.Id);
+                }
             }
             else
             {
@@ -153,13 +156,13 @@ namespace MoscowNvcBot.Web.Models.Commands
             return new InlineKeyboardMarkup(rows);
         }
 
-        private async Task GenerateAndSendAsync(ITelegramBotClient client, long chatId, CustomCommandData data)
+        private async Task<bool> GenerateAndSendAsync(ITelegramBotClient client, long chatId, CustomCommandData data)
         {
             List<GoogleFileData> files = data.Files.Values.Where(f => f.Amount > 0).ToList();
             if (!files.Any())
             {
                 await client.SendTextMessageAsync(chatId, "Ничего не выбрано!");
-                return;
+                return false;
             }
 
             List<Task<TempFile>> tasks = files.Select(f => f.DownloadTask).ToList();
@@ -176,7 +179,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             {
                 await client.SendTextMessageAsync(chatId,
                     $"Ой, что-то не вышло! Попробуй ещё раз, пожалуйста: /{Name}");
-                return;
+                return true;
             }
 
             await client.SendPhotoAsync(chatId, _unifying);
@@ -193,6 +196,8 @@ namespace MoscowNvcBot.Web.Models.Commands
                     await client.SendDocumentAsync(chatId, pdf);
                 }
             }
+
+            return true;
         }
 
         private async Task UpdateAmountAsync(ITelegramBotClient client, long chatId, Message message,
