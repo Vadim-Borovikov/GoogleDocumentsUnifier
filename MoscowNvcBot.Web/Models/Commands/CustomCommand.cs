@@ -93,6 +93,18 @@ namespace MoscowNvcBot.Web.Models.Commands
             }
         }
 
+        internal override async Task HandleExceptionAsync(Exception exception, long chatId, ITelegramBotClient client)
+        {
+            bool success = ChatData.TryGetValue(chatId, out CustomCommandData data);
+            if (!success)
+            {
+                throw new Exception("Couldn't get data from ConcurrentDictionary!");
+            }
+            await data.Clear(client, chatId);
+
+            await base.HandleExceptionAsync(exception, chatId, client);
+        }
+
         private static async Task<Message> SendFirstMessageAsync(Message message, ITelegramBotClient client)
         {
             int replyToMessageId = 0;
