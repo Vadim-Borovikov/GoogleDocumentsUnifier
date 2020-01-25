@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="googleProject.json" />
+    <None Remove="project.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="googleProject.json">
+    <Content Include="project.json">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
