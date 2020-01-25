@@ -8,7 +8,7 @@ namespace GoogleDocumentsUnifier.Logic
         public readonly string Name;
         public readonly DateTime? ModifiedTime;
 
-        internal FileInfo(string id, string name, DateTime? modifiedTime)
+        public FileInfo(string id, string name, DateTime? modifiedTime)
         {
             Id = id;
             Name = name;

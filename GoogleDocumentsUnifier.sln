@@ -3,11 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Logic.Legacy", "GoogleDocumentsUnifier.Logic.Legacy\GoogleDocumentsUnifier.Logic.Legacy.csproj", "{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Logic.Tests.Legacy", "GoogleDocumentsUnifier.Logic.Tests.Legacy\GoogleDocumentsUnifier.Logic.Tests.Legacy.csproj", "{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Legacy", "GoogleDocumentsUnifier.Legacy\GoogleDocumentsUnifier.Legacy.csproj", "{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoscowNvcBot.Console.Legacy", "MoscowNvcBot.Console.Legacy\MoscowNvcBot.Console.Legacy.csproj", "{D53EB328-604F-4C1E-B2A4-F48286A570DB}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MoscowNvcBot.Web", "MoscowNvcBot.Web\MoscowNvcBot.Web.csproj", "{1552C966-86EE-4A41-B04E-BE878EDC7732}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleDocumentsUnifier.Logic", "GoogleDocumentsUnifier.Logic\GoogleDocumentsUnifier.Logic.csproj", "{4038923E-ABAD-4364-82EE-FD42DC21D45E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleDocumentsUnifier.Logic.Tests", "GoogleDocumentsUnifier.Logic.Tests\GoogleDocumentsUnifier.Logic.Tests.csproj", "{6D8AE602-3BD9-4E22-994F-CD6A92924365}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDocumentsUnifier.Logic.Tests", "GoogleDocumentsUnifier.Logic.Tests\GoogleDocumentsUnifier.Logic.Tests.csproj", "{6D8AE602-3BD9-4E22-994F-CD6A92924365}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +23,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FFB0121-FEEF-4B5F-A67F-C875C113A5C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C59CE5AE-B2A5-4EAA-BFC9-02ED8C6370CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C1CCB74-3BF8-4606-9656-024FFFBC2C5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D53EB328-604F-4C1E-B2A4-F48286A570DB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1552C966-86EE-4A41-B04E-BE878EDC7732}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1552C966-86EE-4A41-B04E-BE878EDC7732}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1552C966-86EE-4A41-B04E-BE878EDC7732}.Release|Any CPU.ActiveCfg = Release|Any CPU

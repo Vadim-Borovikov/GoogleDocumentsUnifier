@@ -5,6 +5,8 @@ namespace GoogleDocumentsUnifier.Logic
 {
     public class Pdf : IDisposable
     {
+        private PdfDocument _document;
+
         public static Pdf CreateReader(string inputPath)
         {
             var pdf = new Pdf();
@@ -31,14 +33,18 @@ namespace GoogleDocumentsUnifier.Logic
             return pdf;
         }
 
-        public void Dispose() { _document.Close(); }
-
-        public void AddAllPages(Pdf pdf) => pdf._document.CopyPagesTo(1, pdf.GetPagesAmount(), _document);
-
-        public int GetPagesAmount() => _document.GetNumberOfPages();
-
         private Pdf() { }
 
-        private PdfDocument _document;
+        public void Dispose()
+        {
+            _document.Close();
+        }
+
+        public void AddAllPages(Pdf pdf)
+        {
+            pdf._document.CopyPagesTo(1, pdf.GetPagesAmount(), _document);
+        }
+
+        public int GetPagesAmount() => _document.GetNumberOfPages();
     }
 }

@@ -1,60 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace GoogleDocumentsUnifier.Logic
 {
     public class DataManager : IDisposable
     {
-        public DataManager(string projectJson) { _provider = new GoogleApisDriveProvider(projectJson); }
+        public DataManager(string projectJson)
+        {
+            _provider = new GoogleApisDriveProvider(projectJson);
+        }
 
-        public void Dispose() { _provider.Dispose(); }
+        public void Dispose()
+        {
+            _provider.Dispose();
+        }
 
         public async Task<FileInfo> GetFileInfoAsync(string id) => await _provider.GetFileInfoAsync(id);
 
-        public async Task<FileInfo> FindFileInFolderAsync(string parent, string name)
+        public async Task<FileInfo> FindFileInFolderAsync(string target, string pdfName)
         {
-            IEnumerable<FileInfo> files = await _provider.FindFilesInFolderAsync(parent, name);
-            return files.FirstOrDefault();
+            return await _provider.FindFileInFolderAsync(target, pdfName);
         }
 
-        public async Task<IEnumerable<FileInfo>> GetFilesInFolderAsync(string parent)
-        {
-            return await _provider.GetFilesInFolder(parent);
-        }
-
-        public async Task DownloadAsync(DocumentInfo info, string resultPath)
+        public async Task CopyAsync(DocumentRequest request, string resultPath)
         {
             using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {
-                using (var temp = new TempFile())
-                {
-                    using (var stream = new MemoryStream())
-                    {
-                        await SetupStreamAsync(stream, info);
-                        using (var fileStream = new FileStream(temp.File.FullName, FileMode.Open))
-                        {
-                            stream.WriteTo(fileStream);
-                        }
-                    }
-
-                    using (Pdf pdfReader = Pdf.CreateReader(temp.File.FullName))
-                    {
-                        pdfWriter.AddAllPages(pdfReader);
-                    }
-                }
+                await ImportAsync(request, pdfWriter);
             }
         }
 
-        public static void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
+        public async Task UnifyAsync(IEnumerable<DocumentRequest> requests, string resultPath)
         {
             using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {
                 foreach (DocumentRequest request in requests)
                 {
-                    Add(request, pdfWriter);
+                    await ImportAsync(request, pdfWriter);
                 }
             }
         }
@@ -75,14 +60,40 @@ namespace GoogleDocumentsUnifier.Logic
             }
         }
 
-        private static void Add(DocumentRequest source, Pdf targetWriter)
+        private async Task ImportAsync(DocumentRequest request, Pdf pdfWriter)
         {
-            using (Pdf pdfReader = Pdf.CreateReader(source.Path))
+            bool tempFileNeeded = request.Info.DocumentType != DocumentType.LocalPdf;
+
+            string path;
+
+            if (tempFileNeeded)
             {
-                for (uint i = 0; i < source.Amount; ++i)
+                using (var stream = new MemoryStream())
                 {
-                    targetWriter.AddAllPages(pdfReader);
+                    await SetupStreamAsync(stream, request.Info);
+                    path = Path.GetTempFileName();
+                    using (var fileStream = new FileStream(path, FileMode.Open))
+                    {
+                        stream.WriteTo(fileStream);
+                    }
                 }
+            }
+            else
+            {
+                path = request.Info.Id;
+            }
+
+            using (Pdf pdfReader = Pdf.CreateReader(path))
+            {
+                for (uint i = 0; i < request.Amount; ++i)
+                {
+                    pdfWriter.AddAllPages(pdfReader);
+                }
+            }
+
+            if (tempFileNeeded)
+            {
+                File.Delete(path);
             }
         }
 
@@ -90,11 +101,20 @@ namespace GoogleDocumentsUnifier.Logic
         {
             switch (info.DocumentType)
             {
-                case DocumentType.Document:
-                    await _provider.ExportFileAsync(info.Id, PdfMimeType, stream);
+                case DocumentType.LocalPdf:
+                    throw new ArgumentOutOfRangeException(nameof(info.DocumentType), "Local pdf doesn't need stream!");
+                case DocumentType.WebPdf:
+                    using (var client = new WebClient())
+                    {
+                        byte[] data = client.DownloadData(info.Id);
+                        stream.Write(data, 0, data.Length);
+                    }
                     break;
-                case DocumentType.Pdf:
+                case DocumentType.GooglePdf:
                     await _provider.DownloadFileAsync(info.Id, stream);
+                    break;
+                case DocumentType.GoogleDocument:
+                    await _provider.ExportFileAsync(info.Id, PdfMimeType, stream);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(info.DocumentType));
@@ -102,7 +122,6 @@ namespace GoogleDocumentsUnifier.Logic
         }
 
         private const string PdfMimeType = "application/pdf";
-
         private readonly GoogleApisDriveProvider _provider;
     }
 }

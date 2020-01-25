@@ -1,0 +1,22 @@
+﻿<Window x:Class="GoogleDocumentsUnifier.Legacy.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="GoogleDocumentsUnifier" Height="450" Width="350" MinHeight="180" MinWidth="350"
+        x:ClassModifier="internal" Closing="WindowClosing">
+    <Grid>
+        <ScrollViewer Margin="10,10,10,38" VerticalScrollBarVisibility="Auto">
+            <Grid Name="Grid" VerticalAlignment="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="170*"/>
+                    <ColumnDefinition Width="50*"/>
+                </Grid.ColumnDefinitions>
+            </Grid>
+        </ScrollViewer>
+        <Label Content="Путь" HorizontalAlignment="Left" Margin="10,0,0,10" Height="26" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="PathTextBox" Margin="50,0,148,10" TextWrapping="Wrap" Text="D:/Downloads/nvc.pdf" Height="23" VerticalAlignment="Bottom"/>
+        <Button Name="Button" Content="Скачать и объединить" Margin="0,0,10,10" HorizontalAlignment="Right" Width="133" Click="button_Click" IsDefault="True" Height="22" VerticalAlignment="Bottom"/>
+    </Grid>
+</Window>

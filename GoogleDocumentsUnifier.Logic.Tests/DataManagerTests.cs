@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GoogleDocumentsUnifier.Logic.Tests
@@ -9,105 +7,28 @@ namespace GoogleDocumentsUnifier.Logic.Tests
     public class DataManagerTests
     {
         [TestMethod]
-        public async Task GetFileInfoTest()
+        public async Task UnifyTest()
         {
-            using (DataManager dataManager = CreateDataManager())
+            using (var dataManager = new DataManager(TestsConfiguration.Instance.GoogleProjectJson))
             {
-                FileInfo info = await dataManager.GetFileInfoAsync(TestsConfiguration.Instance.PdfId);
-                CheckPdfInfo(info);
-            }
-        }
-
-        [TestMethod]
-        public async Task FindFileInFolderTest()
-        {
-            using (DataManager dataManager = CreateDataManager())
-            {
-                FileInfo info = await dataManager.FindFileInFolderAsync(TestsConfiguration.Instance.PdfParentId,
-                    TestsConfiguration.Instance.PdfName);
-                CheckPdfInfo(info);
-            }
-        }
-
-        [TestMethod]
-        public async Task GetFilesInFolderTest()
-        {
-            using (DataManager dataManager = CreateDataManager())
-            {
-                IEnumerable<FileInfo> infos =
-                    await dataManager.GetFilesInFolderAsync(TestsConfiguration.Instance.PdfParentId);
-                Assert.AreEqual(TestsConfiguration.Instance.PdfParentChildrenAmount, infos.Count());
-            }
-        }
-
-        [TestMethod]
-        public void UnifyTest()
-        {
-            var requests = new[]
-            {
-                new DocumentRequest(TestsConfiguration.Instance.Pdf1Path, 1),
-                new DocumentRequest(TestsConfiguration.Instance.Pdf2Path, 1)
-            };
-            int pages = TestsConfiguration.Instance.Pdf1Pages + TestsConfiguration.Instance.Pdf2Pages;
-            using (var temp = new TempFile())
-            {
-                DataManager.Unify(requests, temp.File.FullName);
-                using (Pdf pdf = Pdf.CreateReader(temp.File.FullName))
+                var pdf1 = new DocumentInfo(TestsConfiguration.Instance.Pdf1Path, DocumentType.LocalPdf);
+                var pdf2 = new DocumentInfo(TestsConfiguration.Instance.Pdf2Path, DocumentType.LocalPdf);
+                var requests = new[]
                 {
-                    Assert.AreEqual(pages, pdf.GetPagesAmount());
+                    new DocumentRequest(pdf1),
+                    new DocumentRequest(pdf2)
+                };
+                using (var temp = new TempFile())
+                {
+                    await dataManager.UnifyAsync(requests, temp.File.FullName);
+                    using (Pdf pdf = Pdf.CreateReader(temp.File.FullName))
+                    {
+                        Assert.AreEqual(TotalPagesAmount, pdf.GetPagesAmount());
+                    }
                 }
             }
         }
 
-        [TestMethod]
-        public async Task UpdateAndDownloadTest()
-        {
-            using (DataManager dataManager = CreateDataManager())
-            {
-                await dataManager.UpdateAsync(TestsConfiguration.Instance.UpdatablePdfId,
-                    TestsConfiguration.Instance.Pdf1Path);
-
-                await CheckGooglePdf(dataManager, TestsConfiguration.Instance.UpdatablePdfId,
-                    TestsConfiguration.Instance.Pdf1Pages);
-
-                await dataManager.UpdateAsync(TestsConfiguration.Instance.UpdatablePdfId,
-                    TestsConfiguration.Instance.Pdf2Path);
-
-                await CheckGooglePdf(dataManager, TestsConfiguration.Instance.UpdatablePdfId,
-                    TestsConfiguration.Instance.Pdf2Pages);
-            }
-        }
-
-        private static DataManager CreateDataManager()
-        {
-            return new DataManager(TestsConfiguration.Instance.GoogleProjectJson);
-        }
-
-        private static void CheckPdfInfo(FileInfo info)
-        {
-            Assert.IsNotNull(info);
-            Assert.AreEqual(TestsConfiguration.Instance.PdfId, info.Id);
-            Assert.AreEqual(TestsConfiguration.Instance.PdfName, info.Name);
-        }
-
-        private static async Task CheckGooglePdf(DataManager dataManager, string id, int pages)
-        {
-            var info = new DocumentInfo(id, DocumentType.Pdf);
-            using (var temp = new TempFile())
-            {
-                await dataManager.DownloadAsync(info, temp.File.FullName);
-                CheckLocalPdf(temp.File, pages);
-            }
-        }
-
-        private static void CheckLocalPdf(System.IO.FileInfo file, int pages)
-        {
-            Assert.IsTrue(file.Exists);
-            Assert.AreNotEqual(0, file.Length);
-            using (Pdf pdf = Pdf.CreateReader(file.FullName))
-            {
-                Assert.AreEqual(pages, pdf.GetPagesAmount());
-            }
-        }
+        private const int TotalPagesAmount = 3;
     }
 }
