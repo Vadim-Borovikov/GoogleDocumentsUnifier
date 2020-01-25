@@ -15,8 +15,8 @@ namespace MoscowNvcBot.Web.Models
             Parallel.ForEach(Files.Values.Select(f => f.DownloadTask), t => t.Result.Dispose());
             Files.Clear();
 
-            IEnumerable<Task> tasks = MessageIds.Select(id => client.DeleteMessageAsync(chatId, id));
-            await Task.WhenAll(tasks);
+            // IEnumerable<Task> tasks = MessageIds.Select(id => client.DeleteMessageAsync(chatId, id));
+            // await Task.WhenAll(tasks);
             MessageIds.Clear();
         }
     }
