@@ -182,7 +182,15 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return true;
             }
 
-            await client.SendPhotoAsync(chatId, _unifying);
+            try
+            {
+                await client.SendPhotoAsync(chatId, _unifying);
+            }
+            catch (Exception e)
+            {
+                await client.SendTextMessageAsync(chatId, e.Message);
+                await client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
+            }
 
             using (var temp = new TempFile())
             {
