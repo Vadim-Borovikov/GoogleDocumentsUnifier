@@ -1,16 +1,16 @@
 ﻿using System;
 using System.IO;
 
-namespace GoogleDocumentsUnifier.Logic.Tests.Legacy
+namespace GoogleDocumentsUnifier.Logic
 {
-    internal class TempFile : IDisposable
+    public class TempFile : IDisposable
     {
-        public readonly FileInfo File;
+        public readonly System.IO.FileInfo File;
 
         public TempFile()
         {
             string path = Path.GetTempFileName();
-            File = new FileInfo(path);
+            File = new System.IO.FileInfo(path);
         }
 
         public void Dispose()

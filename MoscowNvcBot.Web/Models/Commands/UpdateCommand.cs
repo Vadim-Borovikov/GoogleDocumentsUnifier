@@ -1,13 +1,11 @@
-﻿using GoogleDocumentsUnifier.Logic;
+﻿using System;
+using GoogleDocumentsUnifier.Logic;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using File = System.IO.File;
-using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
@@ -16,14 +14,15 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "update";
         internal override string Description => "обновить раздатки на Диске";
 
-        private readonly IEnumerable<DocumentInfo> _infos;
+        private readonly IEnumerable<string> _sources;
         private readonly string _targetId;
         private readonly string _targetUrl;
         private readonly DataManager _googleDataManager;
 
-        public UpdateCommand(IEnumerable<string> sources, string targetId, string targetPrefix, DataManager googleDataManager)
+        public UpdateCommand(IEnumerable<string> sources, string targetId, string targetPrefix,
+            DataManager googleDataManager)
         {
-            _infos = sources.Select(CreateInfo);
+            _sources = sources;
             _targetId = targetId;
             _targetUrl = $"{targetPrefix}{targetId}";
             _googleDataManager = googleDataManager;
@@ -37,71 +36,76 @@ namespace MoscowNvcBot.Web.Models.Commands
                 replyToMessageId = message.MessageId;
             }
 
-            Task<Message> messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown,
+            Task<Message> messageTask = client.SendTextMessageAsync(message.Chat, "_Проверяю..._", ParseMode.Markdown,
                 replyToMessageId: replyToMessageId);
 
-            List<Task<bool>> tasks = _infos.Select(UpdateGooglePdfAsync).ToList();
-            await Task.WhenAll(tasks);
-            bool updated = tasks.Select(t => t.Result).Any(r => r);
+            List<Task<GooglePdfData>> checkTasks = _sources.Select(CheckGooglePdfAsync).ToList();
+            await Task.WhenAll(checkTasks);
+            List<GooglePdfData> toUpdate =
+                checkTasks.Select(t => t.Result).Where(d => d.Status != GooglePdfData.FileStatus.Ok).ToList();
 
-            Message botMessage = await messageTask;
+            string text;
+            if (toUpdate.Any())
+            {
+                await messageTask;
+                messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown,
+                    replyToMessageId: replyToMessageId);
 
-            Task deletionTask = client.DeleteMessageAsync(message.Chat, botMessage.MessageId);
+                IEnumerable<Task> updateTasks = toUpdate.Select(UpdateAsync);
+                await Task.WhenAll(updateTasks);
 
-            string text = updated ? "Готово" : "Раздатки уже актуальны";
-            text += $". Ссылка на папку: {_targetUrl}";
+                text = "Готово";
+            }
+            else
+            {
+                text = "Раздатки уже актуальны";
+            }
 
-            await client.SendTextMessageAsync(message.Chat, text, replyToMessageId: replyToMessageId);
-            await deletionTask;
+            await messageTask;
+            await client.SendTextMessageAsync(message.Chat, $"{text}. Ссылка на папку: {_targetUrl}",
+                replyToMessageId: replyToMessageId);
         }
 
-        private async Task<bool> UpdateGooglePdfAsync(DocumentInfo info)
+        private async Task<GooglePdfData> CheckGooglePdfAsync(string id)
         {
-            FileInfo fileInfo = await _googleDataManager.GetFileInfoAsync(info.Id);
+            FileInfo fileInfo = await _googleDataManager.GetFileInfoAsync(id);
 
             string pdfName = $"{fileInfo.Name}.pdf";
             FileInfo pdfInfo = await _googleDataManager.FindFileInFolderAsync(_targetId, pdfName);
 
             if (pdfInfo == null)
             {
-                await CreateAsync(info, pdfName);
-                return true;
+                return GooglePdfData.CreateNone(id, pdfName);
             }
 
             if (pdfInfo.ModifiedTime < fileInfo.ModifiedTime)
             {
-                await UpdateAsync(info, pdfInfo.Id);
-                return true;
+                return GooglePdfData.CreateOutdated(id, pdfInfo.Id);
             }
 
-            return false;
+            return GooglePdfData.CreateOk();
         }
 
-        private async Task CreateAsync(DocumentInfo info, string name)
+        private async Task UpdateAsync(GooglePdfData data)
         {
-            string path = await DownloadAsync(info);
-            await _googleDataManager.CreateAsync(name, _targetId, path);
-            File.Delete(path);
-        }
+            using (var temp = new TempFile())
+            {
+                var info = new DocumentInfo(data.SourceId, DocumentType.Document);
+                await _googleDataManager.DownloadAsync(info, temp.File.FullName);
 
-        private async Task UpdateAsync(DocumentInfo info, string pdfId)
-        {
-            string path = await DownloadAsync(info);
-            await _googleDataManager.UpdateAsync(pdfId, path);
-            File.Delete(path);
-        }
-
-        private async Task<string> DownloadAsync(DocumentInfo info)
-        {
-            var request = new DocumentRequest(info);
-            string path = Path.GetTempFileName();
-            await _googleDataManager.CopyAsync(request, path);
-            return path;
-        }
-
-        private static DocumentInfo CreateInfo(string source)
-        {
-            return new DocumentInfo(source, DocumentType.GoogleDocument);
+                switch (data.Status)
+                {
+                    case GooglePdfData.FileStatus.None:
+                        await _googleDataManager.CreateAsync(data.Name, _targetId, temp.File.FullName);
+                        break;
+                    case GooglePdfData.FileStatus.Outdated:
+                        await _googleDataManager.UpdateAsync(data.Id, temp.File.FullName);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(GooglePdfData.FileStatus), data.Status,
+                            "Unexpected Pdf status!");
+                }
+            }
         }
     }
 }
