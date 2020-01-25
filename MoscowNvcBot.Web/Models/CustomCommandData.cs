@@ -8,11 +8,16 @@ namespace MoscowNvcBot.Web.Models
     internal class CustomCommandData
     {
         public readonly Dictionary<string, GoogleFileData> Files = new Dictionary<string, GoogleFileData>();
+        public readonly List<int> MessageIds = new List<int>();
 
-        public void Clear()
+        public async Task Clear(ITelegramBotClient client, long chatId)
         {
             Parallel.ForEach(Files.Values.Select(f => f.DownloadTask), t => t.Result.Dispose());
             Files.Clear();
+
+            IEnumerable<Task> tasks = MessageIds.Select(id => client.DeleteMessageAsync(chatId, id));
+            await Task.WhenAll(tasks);
+            MessageIds.Clear();
         }
     }
 }

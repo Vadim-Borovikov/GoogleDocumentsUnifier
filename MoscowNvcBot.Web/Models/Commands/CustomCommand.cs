@@ -22,15 +22,17 @@ namespace MoscowNvcBot.Web.Models.Commands
         private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
         private readonly string _sourcesUrl;
+        private readonly InputOnlineFile _unifying;
         private readonly DataManager _googleDataManager;
 
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
 
-        public CustomCommand(string sourcesUrl, DataManager googleDataManager)
+        public CustomCommand(string sourcesUrl, string unifyingId, DataManager googleDataManager)
         {
             _sourcesUrl = sourcesUrl;
+            _unifying = new InputOnlineFile(unifyingId);
             _googleDataManager = googleDataManager;
         }
 
@@ -41,10 +43,11 @@ namespace MoscowNvcBot.Web.Models.Commands
             IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_sourcesUrl);
             List<FileInfo> infosList = infos.ToList();
 
-            CustomCommandData data = CreateOrClearDataAsync(message.Chat.Id);
+            CustomCommandData data = await CreateOrClearDataAsync(client, message.Chat.Id);
             FileInfo last = infosList.Last();
 
             await messageTask;
+            data.MessageIds.Add(messageTask.Result.MessageId);
 
             foreach (FileInfo info in infosList)
             {
@@ -58,8 +61,9 @@ namespace MoscowNvcBot.Web.Models.Commands
 
                 bool isLast = info == last;
                 InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
-                await client.SendTextMessageAsync(message.Chat, name,
+                Message chatMessage = await client.SendTextMessageAsync(message.Chat, name,
                     disableNotification: !isLast, replyMarkup: keyboard);
+                data.MessageIds.Add(chatMessage.MessageId);
             }
         }
 
@@ -77,7 +81,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 bool shouldCleanup = await GenerateAndSendAsync(client, chatId, commandData);
                 if (shouldCleanup)
                 {
-                    commandData.Clear();
+                    await commandData.Clear(client, message.Chat.Id);
                 }
             }
             else
@@ -99,7 +103,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             {
                 throw new Exception("Couldn't get data from ConcurrentDictionary!");
             }
-            data.Clear();
+            await data.Clear(client, chatId);
 
             await base.HandleExceptionAsync(exception, chatId, client);
         }
@@ -115,12 +119,12 @@ namespace MoscowNvcBot.Web.Models.Commands
                 disableNotification: true, replyToMessageId: replyToMessageId);
         }
 
-        private static CustomCommandData CreateOrClearDataAsync(long chatId)
+        private static async Task<CustomCommandData> CreateOrClearDataAsync(ITelegramBotClient client, long chatId)
         {
             bool found = ChatData.TryGetValue(chatId, out CustomCommandData data);
             if (found)
             {
-                data.Clear();
+                await data.Clear(client, chatId);
             }
             else
             {
@@ -164,10 +168,9 @@ namespace MoscowNvcBot.Web.Models.Commands
             List<Task<TempFile>> tasks = files.Select(f => f.DownloadTask).ToList();
 
             List<Task<TempFile>> runningTasks = tasks.Where(t => t.Status == TaskStatus.Running).ToList();
-            Task<Message> messageTask;
             if (runningTasks.Any())
             {
-                messageTask = client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
+                Task<Message> messageTask = client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
                 await Task.WhenAll(runningTasks);
                 await messageTask;
             }
@@ -179,13 +182,20 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return true;
             }
 
-            messageTask = client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
+            try
+            {
+                await client.SendPhotoAsync(chatId, _unifying);
+            }
+            catch (Exception e)
+            {
+                await client.SendTextMessageAsync(chatId, e.Message);
+                await client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
+            }
 
             using (var temp = new TempFile())
             {
                 DataManager.Unify(files.Select(CreateRequest), temp.File.FullName);
 
-                await messageTask;
                 Task chatActionTask = client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
                 using (var fileStream = new FileStream(temp.File.FullName, FileMode.Open))
                 {
