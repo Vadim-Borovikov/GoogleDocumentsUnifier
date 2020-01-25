@@ -246,4 +246,4 @@ ModelManifest.xml
 /MoscowNvcBot.Console.Legacy/Keys/token.txt
 /GoogleDocumentsUnifier.Logic.Tests.Legacy/Keys/project.json
 /GoogleDocumentsUnifier.Legacy/Keys/project.json
-/GoogleDocumentsUnifier.Logic.Tests/appsettings.Development.json
+/GoogleDocumentsUnifier.Logic.Tests/googleProject.json

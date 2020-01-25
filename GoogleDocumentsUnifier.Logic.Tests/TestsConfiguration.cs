@@ -1,3 +1,4 @@
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -39,14 +40,9 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         {
             IConfigurationRoot config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile("appsettings.Development.json", true)
                 .Build();
 
-            string googleProjectJson = testContext.Properties["GoogleProjectJson"]?.ToString()?.Replace("__", " ");
-            if (string.IsNullOrWhiteSpace(googleProjectJson))
-            {
-                googleProjectJson = config["GoogleProjectJson"];
-            }
+            string googleProjectJson = File.ReadAllText(config["GoogleProfectJsonPath"]);
 
             Instance = new TestsConfiguration(config["Pdf1Path"], config["Pdf2Path"], int.Parse(config["Pdf1Pages"]),
                 int.Parse(config["Pdf2Pages"]), config["PdfParentId"], int.Parse(config["PdfParentChildrenAmount"]),
