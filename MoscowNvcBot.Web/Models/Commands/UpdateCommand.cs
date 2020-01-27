@@ -88,11 +88,9 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private async Task CreateOrUpdateAsync(GooglePdfData data)
         {
-            using (var temp = new TempFile())
+            var info = new DocumentInfo(data.SourceId, DocumentType.Document);
+            using (TempFile temp = await _googleDataManager.DownloadAsync(info))
             {
-                var info = new DocumentInfo(data.SourceId, DocumentType.Document);
-                await _googleDataManager.DownloadAsync(info, temp.Path);
-
                 switch (data.Status)
                 {
                     case GooglePdfData.FileStatus.None:

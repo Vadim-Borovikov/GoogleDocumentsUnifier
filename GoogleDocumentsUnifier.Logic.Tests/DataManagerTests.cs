@@ -50,9 +50,8 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 new DocumentRequest(TestsConfiguration.Instance.Pdf2Path, 1)
             };
             int pages = TestsConfiguration.Instance.Pdf1Pages + TestsConfiguration.Instance.Pdf2Pages;
-            using (var temp = new TempFile())
+            using (TempFile temp = DataManager.Unify(requests))
             {
-                DataManager.Unify(requests, temp.Path);
                 using (Pdf pdf = Pdf.CreateReader(temp.Path))
                 {
                     Assert.AreEqual(pages, pdf.GetPagesAmount());
@@ -94,9 +93,8 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         private static async Task CheckGooglePdf(DataManager dataManager, string id, int pages)
         {
             var info = new DocumentInfo(id, DocumentType.Pdf);
-            using (var temp = new TempFile())
+            using (TempFile temp = await dataManager.DownloadAsync(info))
             {
-                await dataManager.DownloadAsync(info, temp.Path);
                 CheckLocalPdf(temp.Path, pages);
             }
         }

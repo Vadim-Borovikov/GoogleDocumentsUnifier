@@ -27,7 +27,6 @@ namespace MoscowNvcBot.Web.Models.Commands
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
-
         public CustomCommand(string sourcesUrl, DataManager googleDataManager)
         {
             _sourcesUrl = sourcesUrl;
@@ -52,7 +51,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 string name = Path.GetFileNameWithoutExtension(info.Name);
                 var docInfo = new DocumentInfo(info.Id, DocumentType.Pdf);
 
-                Task<TempFile> downloadTask = DownloadToTempAsync(docInfo);
+                Task<TempFile> downloadTask = _googleDataManager.DownloadAsync(docInfo);
 
                 var fileData = new GoogleFileData(downloadTask);
                 data.Files.Add(name, fileData);
@@ -133,13 +132,6 @@ namespace MoscowNvcBot.Web.Models.Commands
             return data;
         }
 
-        private async Task<TempFile> DownloadToTempAsync(DocumentInfo info)
-        {
-            var temp = new TempFile();
-            await _googleDataManager.DownloadAsync(info, temp.Path);
-            return temp;
-        }
-
         private InlineKeyboardMarkup GetKeyboard(uint amount, bool isLast)
         {
             IEnumerable<InlineKeyboardButton> amountRow = Amounts.Select(a => GetAmountButton(a, amount == a));
@@ -183,10 +175,8 @@ namespace MoscowNvcBot.Web.Models.Commands
 
             messageTask = client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
 
-            using (var temp = new TempFile())
+            using (TempFile temp = DataManager.Unify(files.Select(CreateRequest)))
             {
-                DataManager.Unify(files.Select(CreateRequest), temp.Path);
-
                 await messageTask;
                 Task chatActionTask = client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
                 using (var fileStream = new FileStream(temp.Path, FileMode.Open))

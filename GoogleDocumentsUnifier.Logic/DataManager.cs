@@ -25,7 +25,30 @@ namespace GoogleDocumentsUnifier.Logic
             return await _provider.GetFilesInFolder(parent);
         }
 
-        public async Task DownloadAsync(DocumentInfo info, string resultPath)
+        public async Task<TempFile> DownloadAsync(DocumentInfo info)
+        {
+            return await TempFile.CreateForAsync(DownloadAsync, info);
+        }
+
+        public static TempFile Unify(IEnumerable<DocumentRequest> requests) => TempFile.CreateFor(Unify, requests);
+
+        public async Task CreateAsync(string name, string parentId, string filePath)
+        {
+            using (FileStream stream = File.OpenRead(filePath))
+            {
+                await _provider.CreateAsync(name, parentId, stream, PdfMimeType);
+            }
+        }
+
+        public async Task UpdateAsync(string fileId, string filePath)
+        {
+            using (FileStream stream = File.OpenRead(filePath))
+            {
+                await _provider.UpdateAsync(fileId, stream, PdfMimeType);
+            }
+        }
+
+        private async Task DownloadAsync(DocumentInfo info, string resultPath)
         {
             using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {
@@ -48,44 +71,6 @@ namespace GoogleDocumentsUnifier.Logic
             }
         }
 
-        public static void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
-        {
-            using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
-            {
-                foreach (DocumentRequest request in requests)
-                {
-                    Add(request, pdfWriter);
-                }
-            }
-        }
-
-        public async Task CreateAsync(string name, string parentId, string filePath)
-        {
-            using (FileStream stream = File.OpenRead(filePath))
-            {
-                await _provider.CreateAsync(name, parentId, stream, PdfMimeType);
-            }
-        }
-
-        public async Task UpdateAsync(string fileId, string filePath)
-        {
-            using (FileStream stream = File.OpenRead(filePath))
-            {
-                await _provider.UpdateAsync(fileId, stream, PdfMimeType);
-            }
-        }
-
-        private static void Add(DocumentRequest source, Pdf targetWriter)
-        {
-            using (Pdf pdfReader = Pdf.CreateReader(source.Path))
-            {
-                for (uint i = 0; i < source.Amount; ++i)
-                {
-                    targetWriter.AddAllPages(pdfReader);
-                }
-            }
-        }
-
         private async Task SetupStreamAsync(Stream stream, DocumentInfo info)
         {
             switch (info.DocumentType)
@@ -98,6 +83,28 @@ namespace GoogleDocumentsUnifier.Logic
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(info.DocumentType));
+            }
+        }
+
+        private static void Unify(IEnumerable<DocumentRequest> requests, string resultPath)
+        {
+            using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
+            {
+                foreach (DocumentRequest request in requests)
+                {
+                    Add(request, pdfWriter);
+                }
+            }
+        }
+
+        private static void Add(DocumentRequest source, Pdf targetWriter)
+        {
+            using (Pdf pdfReader = Pdf.CreateReader(source.Path))
+            {
+                for (uint i = 0; i < source.Amount; ++i)
+                {
+                    targetWriter.AddAllPages(pdfReader);
+                }
             }
         }
 
