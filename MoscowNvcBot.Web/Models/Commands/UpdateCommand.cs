@@ -100,7 +100,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                         await _googleDataManager.UpdateAsync(data.Id, temp.Path);
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(GooglePdfData.FileStatus), data.Status,
+                        throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status,
                             "Unexpected Pdf status!");
                 }
             }
