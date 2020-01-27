@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -51,8 +52,8 @@ namespace GoogleDocumentsUnifier.Logic.Tests
             int pages = TestsConfiguration.Instance.Pdf1Pages + TestsConfiguration.Instance.Pdf2Pages;
             using (var temp = new TempFile())
             {
-                DataManager.Unify(requests, temp.File.FullName);
-                using (Pdf pdf = Pdf.CreateReader(temp.File.FullName))
+                DataManager.Unify(requests, temp.Path);
+                using (Pdf pdf = Pdf.CreateReader(temp.Path))
                 {
                     Assert.AreEqual(pages, pdf.GetPagesAmount());
                 }
@@ -95,16 +96,17 @@ namespace GoogleDocumentsUnifier.Logic.Tests
             var info = new DocumentInfo(id, DocumentType.Pdf);
             using (var temp = new TempFile())
             {
-                await dataManager.DownloadAsync(info, temp.File.FullName);
-                CheckLocalPdf(temp.File, pages);
+                await dataManager.DownloadAsync(info, temp.Path);
+                CheckLocalPdf(temp.Path, pages);
             }
         }
 
-        private static void CheckLocalPdf(System.IO.FileInfo file, int pages)
+        private static void CheckLocalPdf(string path, int pages)
         {
-            Assert.IsTrue(file.Exists);
-            Assert.AreNotEqual(0, file.Length);
-            using (Pdf pdf = Pdf.CreateReader(file.FullName))
+            Assert.IsTrue(File.Exists(path));
+            string content = File.ReadAllText(path);
+            Assert.AreNotEqual(0, content.Length);
+            using (Pdf pdf = Pdf.CreateReader(path))
             {
                 Assert.AreEqual(pages, pdf.GetPagesAmount());
             }

@@ -34,13 +34,13 @@ namespace GoogleDocumentsUnifier.Logic
                     using (var stream = new MemoryStream())
                     {
                         await SetupStreamAsync(stream, info);
-                        using (var fileStream = new FileStream(temp.File.FullName, FileMode.Open))
+                        using (var fileStream = new FileStream(temp.Path, FileMode.Open))
                         {
                             stream.WriteTo(fileStream);
                         }
                     }
 
-                    using (Pdf pdfReader = Pdf.CreateReader(temp.File.FullName))
+                    using (Pdf pdfReader = Pdf.CreateReader(temp.Path))
                     {
                         pdfWriter.AddAllPages(pdfReader);
                     }

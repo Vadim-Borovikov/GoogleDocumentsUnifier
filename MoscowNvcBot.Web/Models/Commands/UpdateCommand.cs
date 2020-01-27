@@ -91,15 +91,15 @@ namespace MoscowNvcBot.Web.Models.Commands
             using (var temp = new TempFile())
             {
                 var info = new DocumentInfo(data.SourceId, DocumentType.Document);
-                await _googleDataManager.DownloadAsync(info, temp.File.FullName);
+                await _googleDataManager.DownloadAsync(info, temp.Path);
 
                 switch (data.Status)
                 {
                     case GooglePdfData.FileStatus.None:
-                        await _googleDataManager.CreateAsync(data.Name, _targetId, temp.File.FullName);
+                        await _googleDataManager.CreateAsync(data.Name, _targetId, temp.Path);
                         break;
                     case GooglePdfData.FileStatus.Outdated:
-                        await _googleDataManager.UpdateAsync(data.Id, temp.File.FullName);
+                        await _googleDataManager.UpdateAsync(data.Id, temp.Path);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(GooglePdfData.FileStatus), data.Status,

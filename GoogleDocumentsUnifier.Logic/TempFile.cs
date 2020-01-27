@@ -5,19 +5,18 @@ namespace GoogleDocumentsUnifier.Logic
 {
     public class TempFile : IDisposable
     {
-        public readonly System.IO.FileInfo File;
+        public readonly string Path;
 
         public TempFile()
         {
-            string path = Path.GetTempFileName();
-            File = new System.IO.FileInfo(path);
+            Path = System.IO.Path.GetTempFileName();
         }
 
         public void Dispose()
         {
-            if (File.Exists)
+            if (File.Exists(Path))
             {
-                File.Delete();
+                File.Delete(Path);
             }
         }
     }

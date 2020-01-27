@@ -20,7 +20,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
         {
             using (var temp = new TempFile())
             {
-                using (Pdf pdf = Pdf.CreateWriter(temp.File.FullName))
+                using (Pdf pdf = Pdf.CreateWriter(temp.Path))
                 {
                     using (Pdf other = Pdf.CreateReader(TestsConfiguration.Instance.Pdf2Path))
                     {

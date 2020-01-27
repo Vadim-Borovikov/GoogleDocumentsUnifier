@@ -136,7 +136,7 @@ namespace MoscowNvcBot.Web.Models.Commands
         private async Task<TempFile> DownloadToTempAsync(DocumentInfo info)
         {
             var temp = new TempFile();
-            await _googleDataManager.DownloadAsync(info, temp.File.FullName);
+            await _googleDataManager.DownloadAsync(info, temp.Path);
             return temp;
         }
 
@@ -185,11 +185,11 @@ namespace MoscowNvcBot.Web.Models.Commands
 
             using (var temp = new TempFile())
             {
-                DataManager.Unify(files.Select(CreateRequest), temp.File.FullName);
+                DataManager.Unify(files.Select(CreateRequest), temp.Path);
 
                 await messageTask;
                 Task chatActionTask = client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
-                using (var fileStream = new FileStream(temp.File.FullName, FileMode.Open))
+                using (var fileStream = new FileStream(temp.Path, FileMode.Open))
                 {
                     var pdf = new InputOnlineFile(fileStream, "Раздатки.pdf");
                     await chatActionTask;
@@ -221,8 +221,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private static DocumentRequest CreateRequest(GoogleFileData data)
         {
-            string path = data.DownloadTask.Result.File.FullName;
-            return new DocumentRequest(path, data.Amount);
+            return new DocumentRequest(data.DownloadTask.Result.Path, data.Amount);
         }
     }
 }

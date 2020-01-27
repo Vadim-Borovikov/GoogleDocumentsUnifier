@@ -13,10 +13,10 @@ namespace GoogleDocumentsUnifier.Logic.Tests
             using (var temp = new TempFile())
             {
                 Assert.IsNotNull(temp);
-                Assert.IsNotNull(temp.File);
-                Assert.IsTrue(temp.File.Exists);
+                path = temp.Path;
 
-                path = temp.File.FullName;
+                Assert.IsNotNull(path);
+                Assert.IsTrue(File.Exists(path));
             }
             Assert.IsFalse(File.Exists(path));
         }
