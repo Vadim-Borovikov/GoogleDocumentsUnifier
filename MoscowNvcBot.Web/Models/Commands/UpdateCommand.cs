@@ -51,7 +51,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown,
                     replyToMessageId: replyToMessageId);
 
-                IEnumerable<Task> updateTasks = toUpdate.Select(UpdateAsync);
+                IEnumerable<Task> updateTasks = toUpdate.Select(CreateOrUpdateAsync);
                 await Task.WhenAll(updateTasks);
 
                 text = "Готово";
@@ -86,7 +86,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             return GooglePdfData.CreateOk();
         }
 
-        private async Task UpdateAsync(GooglePdfData data)
+        private async Task CreateOrUpdateAsync(GooglePdfData data)
         {
             using (var temp = new TempFile())
             {
