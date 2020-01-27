@@ -39,19 +39,20 @@ namespace MoscowNvcBot.Web.Models.Commands
             Task<Message> messageTask = client.SendTextMessageAsync(message.Chat, "_Проверяю..._", ParseMode.Markdown,
                 replyToMessageId: replyToMessageId);
 
-            List<Task<GooglePdfData>> checkTasks = _sources.Select(CheckGooglePdfAsync).ToList();
-            await Task.WhenAll(checkTasks);
-            List<GooglePdfData> toUpdate =
-                checkTasks.Select(t => t.Result).Where(d => d.Status != GooglePdfData.FileStatus.Ok).ToList();
+            List<GooglePdfData> filesToUpdate = _sources
+                .Select(CheckGooglePdfAsync)
+                .Select(t => t.Result)
+                .Where(d => d.Status != GooglePdfData.FileStatus.Ok)
+                .ToList();
 
             string text;
-            if (toUpdate.Any())
+            if (filesToUpdate.Any())
             {
                 await messageTask;
                 messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown,
                     replyToMessageId: replyToMessageId);
 
-                IEnumerable<Task> updateTasks = toUpdate.Select(CreateOrUpdateAsync);
+                IEnumerable<Task> updateTasks = filesToUpdate.Select(CreateOrUpdateAsync);
                 await Task.WhenAll(updateTasks);
 
                 text = "Готово";
