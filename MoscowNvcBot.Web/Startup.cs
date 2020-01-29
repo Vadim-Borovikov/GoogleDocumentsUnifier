@@ -1,9 +1,14 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using MoscowNvcBot.Web.Logging;
 using MoscowNvcBot.Web.Models;
 using MoscowNvcBot.Web.Models.Services;
 
@@ -37,7 +42,7 @@ namespace MoscowNvcBot.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -50,11 +55,27 @@ namespace MoscowNvcBot.Web
                 app.UseHsts();
             }
 
+            loggerFactory.AddProvider(new FileLoggerProvider(LogPath, LogLevel.Warning));
+            ILogger<FileLogger> logger = loggerFactory.CreateLogger<FileLogger>();
+
+            app.UseExceptionHandler(a => a.Run(c => HandleExceptionAsync(c, logger)));
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
             app.UseMvc(routes => routes.MapRoute("update", $"{Configuration["Token"]}/{{controller=Update}}/{{action=post}}"));
         }
+
+        private static Task HandleExceptionAsync(HttpContext context, ILogger logger)
+        {
+            var feature = context.Features.Get<IExceptionHandlerPathFeature>();
+            Exception exception = feature.Error;
+
+            logger.LogError(exception, exception.ToString());
+            return Task.CompletedTask;
+        }
+
+        private const string LogPath = "log.txt";
     }
 }
