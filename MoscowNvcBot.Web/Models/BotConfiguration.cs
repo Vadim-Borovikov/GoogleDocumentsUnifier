@@ -17,5 +17,9 @@ namespace MoscowNvcBot.Web.Models
         public string FolderId { get; set; }
 
         public string Url => $"{Host}:{Port}/{Token}";
+
+        public List<string> CheckListLines { get; set; }
+
+        public string CheckList => string.Join('\n', CheckListLines);
     }
 }

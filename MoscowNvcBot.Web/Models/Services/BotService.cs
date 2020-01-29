@@ -29,7 +29,8 @@ namespace MoscowNvcBot.Web.Models.Services
             var commands = new List<Command>
             {
                 new CustomCommand(_config.DocumentIds, _config.FolderId, _googleDataManager),
-                new UpdateCommand(_config.DocumentIds, _config.FolderId, _googleDataManager)
+                new UpdateCommand(_config.DocumentIds, _config.FolderId, _googleDataManager),
+                new CheckListCommand(_config.CheckList)
             };
 
             Commands = commands.AsReadOnly();
