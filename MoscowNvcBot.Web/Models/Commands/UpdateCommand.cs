@@ -30,14 +30,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            int replyToMessageId = 0;
-            if (message.Chat.Type == ChatType.Group)
-            {
-                replyToMessageId = message.MessageId;
-            }
-
-            Task<Message> messageTask = client.SendTextMessageAsync(message.Chat, "_Проверяю..._", ParseMode.Markdown,
-                replyToMessageId: replyToMessageId);
+            Task<Message> messageTask = client.SendTextMessageAsync(message.Chat, "_Проверяю..._", ParseMode.Markdown);
 
             GooglePdfData[] datas = await Task.WhenAll(_sources.Select(CheckGooglePdfAsync));
             List<GooglePdfData> filesToUpdate = datas.Where(d => d.Status != GooglePdfData.FileStatus.Ok).ToList();
@@ -46,8 +39,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             if (filesToUpdate.Any())
             {
                 await messageTask;
-                messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown,
-                    replyToMessageId: replyToMessageId);
+                messageTask = client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown);
 
                 IEnumerable<Task> updateTasks = filesToUpdate.Select(CreateOrUpdateAsync);
                 await Task.WhenAll(updateTasks);
@@ -60,8 +52,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             }
 
             await messageTask;
-            await client.SendTextMessageAsync(message.Chat, $"{text}. Ссылка на папку: {_targetUrl}",
-                replyToMessageId: replyToMessageId);
+            await client.SendTextMessageAsync(message.Chat, $"{text}. Ссылка на папку: {_targetUrl}");
         }
 
         private async Task<GooglePdfData> CheckGooglePdfAsync(string id)

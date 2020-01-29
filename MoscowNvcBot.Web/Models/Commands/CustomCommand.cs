@@ -35,7 +35,9 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Task<Message> messageTask = SendFirstMessageAsync(message, client);
+            Task<Message> messageTask =
+                client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
+                disableNotification: true);
 
             IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_sourcesUrl);
             List<FileInfo> infosList = infos.ToList();
@@ -103,17 +105,6 @@ namespace MoscowNvcBot.Web.Models.Commands
             await data.Clear(client, chatId);
 
             await base.HandleExceptionAsync(exception, chatId, client);
-        }
-
-        private static Task<Message> SendFirstMessageAsync(Message message, ITelegramBotClient client)
-        {
-            int replyToMessageId = 0;
-            if (message.Chat.Type == ChatType.Group)
-            {
-                replyToMessageId = message.MessageId;
-            }
-            return client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
-                disableNotification: true, replyToMessageId: replyToMessageId);
         }
 
         private static async Task<CustomCommandData> CreateOrClearDataAsync(ITelegramBotClient client, long chatId)

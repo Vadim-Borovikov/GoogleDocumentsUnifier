@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
@@ -33,12 +32,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             builder.AppendLine();
             builder.AppendLine($"Иногда я засыпаю, но ты можешь меня разбудить, если зайдёшь на {_url}.");
 
-            int replyToMessageId = 0;
-            if (message.Chat.Type == ChatType.Group)
-            {
-                replyToMessageId = message.MessageId;
-            }
-            return client.SendTextMessageAsync(message.Chat, builder.ToString(), replyToMessageId: replyToMessageId);
+            return client.SendTextMessageAsync(message.Chat, builder.ToString());
         }
     }
 }
