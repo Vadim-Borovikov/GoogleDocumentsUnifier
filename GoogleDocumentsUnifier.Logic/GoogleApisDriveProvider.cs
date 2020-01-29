@@ -48,19 +48,22 @@ namespace GoogleDocumentsUnifier.Logic
             return GetInfo(file);
         }
 
-        public Task<IEnumerable<FileInfo>> FindFilesInFolderAsync(string parent, string name)
+        public Task<IEnumerable<FileInfo>> FindFilesInFolderAsync(string parentId, string name)
         {
-            return ListFilesAsync($"'{parent}' in parents and name = '{name}'");
+            return ListFilesAsync($"'{parentId}' in parents and name = '{name}'");
         }
 
-        public Task<IEnumerable<FileInfo>> GetFilesInFolder(string parent) => ListFilesAsync($"'{parent}' in parents");
+        public Task<IEnumerable<FileInfo>> GetFilesInFolder(string parentId)
+        {
+            return ListFilesAsync($"'{parentId}' in parents");
+        }
 
-        public Task<IUploadProgress> CreateAsync(string name, string parent, FileStream stream, string contentType)
+        public Task<IUploadProgress> CreateAsync(string name, string parentId, FileStream stream, string contentType)
         {
             var file = new File
             {
                 Name = name,
-                Parents = new[] { parent }
+                Parents = new[] { parentId }
             };
             return _driveService.Files.Create(file, stream, contentType).UploadAsync();
         }

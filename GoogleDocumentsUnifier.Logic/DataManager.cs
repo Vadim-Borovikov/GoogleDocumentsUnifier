@@ -14,13 +14,16 @@ namespace GoogleDocumentsUnifier.Logic
 
         public Task<FileInfo> GetFileInfoAsync(string id) => _provider.GetFileInfoAsync(id);
 
-        public async Task<FileInfo> FindFileInFolderAsync(string parent, string name)
+        public async Task<FileInfo> FindFileInFolderAsync(string parentId, string name)
         {
-            IEnumerable<FileInfo> files = await _provider.FindFilesInFolderAsync(parent, name);
+            IEnumerable<FileInfo> files = await _provider.FindFilesInFolderAsync(parentId, name);
             return files.FirstOrDefault();
         }
 
-        public Task<IEnumerable<FileInfo>> GetFilesInFolderAsync(string parent) => _provider.GetFilesInFolder(parent);
+        public Task<IEnumerable<FileInfo>> GetFilesInFolderAsync(string parentId)
+        {
+            return _provider.GetFilesInFolder(parentId);
+        }
 
         public Task<TempFile> DownloadAsync(DocumentInfo info) => TempFile.CreateForAsync(DownloadAsync, info);
 

@@ -21,48 +21,24 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
-        private readonly string _sourcesUrl;
+        private readonly List<string> _documentIds;
+        private readonly string _folderId;
         private readonly DataManager _googleDataManager;
 
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
-        public CustomCommand(string sourcesUrl, DataManager googleDataManager)
+        public CustomCommand(List<string> documentIds, string folderId, DataManager googleDataManager)
         {
-            _sourcesUrl = sourcesUrl;
+            _documentIds = documentIds;
+            _folderId = folderId;
             _googleDataManager = googleDataManager;
         }
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Message firstMessage =
-                await client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
-                disableNotification: true);
-
-            IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_sourcesUrl);
-            List<FileInfo> infosList = infos.ToList();
-
-            CustomCommandData data = await CreateOrClearDataAsync(client, message.Chat.Id);
-            FileInfo last = infosList.Last();
-
-            data.MessageIds.Add(firstMessage.MessageId);
-
-            foreach (FileInfo info in infosList)
-            {
-                string name = Path.GetFileNameWithoutExtension(info.Name);
-                var docInfo = new DocumentInfo(info.Id, DocumentType.Pdf);
-
-                Task<TempFile> downloadTask = _googleDataManager.DownloadAsync(docInfo);
-
-                var fileData = new GoogleFileData(downloadTask);
-                data.Files.Add(name, fileData);
-
-                bool isLast = info == last;
-                InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
-                Message chatMessage = await client.SendTextMessageAsync(message.Chat, name,
-                    disableNotification: !isLast, replyMarkup: keyboard);
-                data.MessageIds.Add(chatMessage.MessageId);
-            }
+            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _documentIds, _folderId);
+            await SelectAsync(message.Chat, client);
         }
 
         internal override async Task InvokeAsync(Message message, ITelegramBotClient client, string data)
@@ -104,6 +80,38 @@ namespace MoscowNvcBot.Web.Models.Commands
             await data.Clear(client, chatId);
 
             await base.HandleExceptionAsync(exception, chatId, client);
+        }
+
+        private async Task SelectAsync(Chat chat, ITelegramBotClient client)
+        {
+            Message firstMessage =
+                await client.SendTextMessageAsync(chat, "Выбери раздатки:", ParseMode.Markdown,
+                    disableNotification: true);
+
+            IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_folderId);
+            List<FileInfo> infosList = infos.ToList();
+
+            CustomCommandData data = await CreateOrClearDataAsync(client, chat.Id);
+            FileInfo last = infosList.Last();
+
+            data.MessageIds.Add(firstMessage.MessageId);
+
+            foreach (FileInfo info in infosList)
+            {
+                string name = Path.GetFileNameWithoutExtension(info.Name);
+                var docInfo = new DocumentInfo(info.Id, DocumentType.Pdf);
+
+                Task<TempFile> downloadTask = _googleDataManager.DownloadAsync(docInfo);
+
+                var fileData = new GoogleFileData(downloadTask);
+                data.Files.Add(name, fileData);
+
+                bool isLast = info == last;
+                InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
+                Message chatMessage = await client.SendTextMessageAsync(chat, name,
+                    disableNotification: !isLast, replyMarkup: keyboard);
+                data.MessageIds.Add(chatMessage.MessageId);
+            }
         }
 
         private static async Task<CustomCommandData> CreateOrClearDataAsync(ITelegramBotClient client, long chatId)
@@ -164,7 +172,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return true;
             }
 
-            Message unifyingMessage =  await client.SendTextMessageAsync(chatId, "_Объединяю…_", ParseMode.Markdown);
+            Message unifyingMessage = await client.SendTextMessageAsync(chatId, "_Объединяю…_", ParseMode.Markdown);
 
             using (TempFile temp = DataManager.Unify(files.Select(CreateRequest)))
             {

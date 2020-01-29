@@ -12,11 +12,9 @@ namespace MoscowNvcBot.Web.Models
 
         public string GoogleProjectJson { get; set; }
 
-        public List<string> Sources { get; set; }
+        public List<string> DocumentIds { get; set; }
 
         public string FolderId { get; set; }
-
-        public string TargetPrefix { get; set; }
 
         public string Url => $"{Host}:{Port}/{Token}";
     }
