@@ -22,15 +22,14 @@ namespace MoscowNvcBot.Web.Models.Commands
             return Task.CompletedTask;
         }
 
-        internal virtual async Task HandleExceptionAsync(Exception exception, long chatId,
-            ITelegramBotClient client)
+        internal virtual Task HandleExceptionAsync(Exception exception, long chatId, ITelegramBotClient client)
         {
             if (!IsUsageLimitExceed(exception))
             {
                 throw exception;
             }
 
-            await HandleUsageLimitExcess(chatId, client);
+            return HandleUsageLimitExcessAsync(chatId, client);
         }
 
         private static bool IsUsageLimitExceed(Exception exception)
@@ -40,9 +39,9 @@ namespace MoscowNvcBot.Web.Models.Commands
                 googleException.Error.Errors.Any(e => e.Domain == UsageLimitsExceededDomain);
         }
 
-        private static async Task HandleUsageLimitExcess(long chatId, ITelegramBotClient client)
+        private static Task<Message> HandleUsageLimitExcessAsync(long chatId, ITelegramBotClient client)
         {
-            await client.SendTextMessageAsync(chatId,
+            return client.SendTextMessageAsync(chatId,
                 "Google хочет отдохнуть от меня какое-то время. Попробуй позже, пожалуйста!");
         }
 

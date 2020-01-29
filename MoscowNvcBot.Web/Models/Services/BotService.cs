@@ -38,15 +38,15 @@ namespace MoscowNvcBot.Web.Models.Services
             commands.Insert(0, startCommand);
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            await Client.SetWebhookAsync(_config.Url, cancellationToken: cancellationToken);
+            return Client.SetWebhookAsync(_config.Url, cancellationToken: cancellationToken);
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
             _googleDataManager.Dispose();
-            await Client.DeleteWebhookAsync(cancellationToken);
+            return Client.DeleteWebhookAsync(cancellationToken);
         }
     }
 }

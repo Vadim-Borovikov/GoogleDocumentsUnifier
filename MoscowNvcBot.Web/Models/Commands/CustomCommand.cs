@@ -105,14 +105,14 @@ namespace MoscowNvcBot.Web.Models.Commands
             await base.HandleExceptionAsync(exception, chatId, client);
         }
 
-        private static async Task<Message> SendFirstMessageAsync(Message message, ITelegramBotClient client)
+        private static Task<Message> SendFirstMessageAsync(Message message, ITelegramBotClient client)
         {
             int replyToMessageId = 0;
             if (message.Chat.Type == ChatType.Group)
             {
                 replyToMessageId = message.MessageId;
             }
-            return await client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
+            return client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
                 disableNotification: true, replyToMessageId: replyToMessageId);
         }
 
@@ -190,7 +190,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             return true;
         }
 
-        private async Task UpdateAmountAsync(ITelegramBotClient client, long chatId, Message message,
+        private Task<Message> UpdateAmountAsync(ITelegramBotClient client, long chatId, Message message,
             CustomCommandData data, uint amount)
         {
             string name = message.Text;
@@ -199,7 +199,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
             bool isLast = message.ReplyMarkup.InlineKeyboard.Count() == 2;
             InlineKeyboardMarkup keyboard = GetKeyboard(amount, isLast);
-            await client.EditMessageTextAsync(chatId, message.MessageId, name, replyMarkup: keyboard);
+            return client.EditMessageTextAsync(chatId, message.MessageId, name, replyMarkup: keyboard);
         }
 
         private InlineKeyboardButton GetAmountButton(uint amount, bool selected)

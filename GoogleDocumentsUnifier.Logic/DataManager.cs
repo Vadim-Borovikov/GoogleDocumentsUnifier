@@ -12,7 +12,7 @@ namespace GoogleDocumentsUnifier.Logic
 
         public void Dispose() { _provider.Dispose(); }
 
-        public async Task<FileInfo> GetFileInfoAsync(string id) => await _provider.GetFileInfoAsync(id);
+        public Task<FileInfo> GetFileInfoAsync(string id) => _provider.GetFileInfoAsync(id);
 
         public async Task<FileInfo> FindFileInFolderAsync(string parent, string name)
         {
@@ -20,15 +20,9 @@ namespace GoogleDocumentsUnifier.Logic
             return files.FirstOrDefault();
         }
 
-        public async Task<IEnumerable<FileInfo>> GetFilesInFolderAsync(string parent)
-        {
-            return await _provider.GetFilesInFolder(parent);
-        }
+        public Task<IEnumerable<FileInfo>> GetFilesInFolderAsync(string parent) => _provider.GetFilesInFolder(parent);
 
-        public async Task<TempFile> DownloadAsync(DocumentInfo info)
-        {
-            return await TempFile.CreateForAsync(DownloadAsync, info);
-        }
+        public Task<TempFile> DownloadAsync(DocumentInfo info) => TempFile.CreateForAsync(DownloadAsync, info);
 
         public static TempFile Unify(IEnumerable<DocumentRequest> requests) => TempFile.CreateFor(Unify, requests);
 
@@ -71,16 +65,14 @@ namespace GoogleDocumentsUnifier.Logic
             }
         }
 
-        private async Task SetupStreamAsync(Stream stream, DocumentInfo info)
+        private Task SetupStreamAsync(Stream stream, DocumentInfo info)
         {
             switch (info.DocumentType)
             {
                 case DocumentType.Document:
-                    await _provider.ExportFileAsync(info.Id, PdfMimeType, stream);
-                    break;
+                    return _provider.ExportFileAsync(info.Id, PdfMimeType, stream);
                 case DocumentType.Pdf:
-                    await _provider.DownloadFileAsync(info.Id, stream);
-                    break;
+                    return _provider.DownloadFileAsync(info.Id, stream);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(info.DocumentType));
             }

@@ -21,7 +21,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             _url = url;
         }
 
-        internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
+        internal override Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
             var builder = new StringBuilder();
             builder.AppendLine("Привет!");
@@ -38,7 +38,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             {
                 replyToMessageId = message.MessageId;
             }
-            await client.SendTextMessageAsync(message.Chat, builder.ToString(), replyToMessageId: replyToMessageId);
+            return client.SendTextMessageAsync(message.Chat, builder.ToString(), replyToMessageId: replyToMessageId);
         }
     }
 }

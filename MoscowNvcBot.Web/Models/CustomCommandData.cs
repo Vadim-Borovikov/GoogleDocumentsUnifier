@@ -10,14 +10,14 @@ namespace MoscowNvcBot.Web.Models
         public readonly Dictionary<string, GoogleFileData> Files = new Dictionary<string, GoogleFileData>();
         public readonly List<int> MessageIds = new List<int>();
 
-        public async Task Clear(ITelegramBotClient client, long chatId)
+        public Task Clear(ITelegramBotClient client, long chatId)
         {
             Parallel.ForEach(Files.Values.Select(f => f.DownloadTask), t => t.Result.Dispose());
             Files.Clear();
 
-            IEnumerable<Task> tasks = MessageIds.Select(id => client.DeleteMessageAsync(chatId, id));
-            await Task.WhenAll(tasks);
+            List<Task> tasks = MessageIds.Select(id => client.DeleteMessageAsync(chatId, id)).ToList();
             MessageIds.Clear();
+            return Task.WhenAll(tasks);
         }
     }
 }

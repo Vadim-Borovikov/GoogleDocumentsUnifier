@@ -30,16 +30,14 @@ namespace GoogleDocumentsUnifier.Logic
 
         public void Dispose() { _driveService.Dispose(); }
 
-        public async Task<IDownloadProgress> DownloadFileAsync(string id, Stream stream)
+        public Task<IDownloadProgress> DownloadFileAsync(string id, Stream stream)
         {
-            FilesResource.GetRequest request = _driveService.Files.Get(id);
-            return await request.DownloadAsync(stream);
+            return _driveService.Files.Get(id).DownloadAsync(stream);
         }
 
-        public async Task<IDownloadProgress> ExportFileAsync(string id, string targetMimeType, Stream stream)
+        public Task<IDownloadProgress> ExportFileAsync(string id, string targetMimeType, Stream stream)
         {
-            FilesResource.ExportRequest request = _driveService.Files.Export(id, targetMimeType);
-            return await request.DownloadAsync(stream);
+            return _driveService.Files.Export(id, targetMimeType).DownloadAsync(stream);
         }
 
         public async Task<FileInfo> GetFileInfoAsync(string id)
@@ -50,35 +48,27 @@ namespace GoogleDocumentsUnifier.Logic
             return GetInfo(file);
         }
 
-        public async Task<IEnumerable<FileInfo>> FindFilesInFolderAsync(string parent, string name)
+        public Task<IEnumerable<FileInfo>> FindFilesInFolderAsync(string parent, string name)
         {
-            string query = $"'{parent}' in parents and name = '{name}'";
-            return await ListFilesAsync(query);
+            return ListFilesAsync($"'{parent}' in parents and name = '{name}'");
         }
 
-        public async Task<IEnumerable<FileInfo>> GetFilesInFolder(string parent)
-        {
-            string query = $"'{parent}' in parents";
-            return await ListFilesAsync(query);
-        }
+        public Task<IEnumerable<FileInfo>> GetFilesInFolder(string parent) => ListFilesAsync($"'{parent}' in parents");
 
-        public async Task<IUploadProgress> CreateAsync(string name, string parent, FileStream stream,
-            string contentType)
+        public Task<IUploadProgress> CreateAsync(string name, string parent, FileStream stream, string contentType)
         {
             var file = new File
             {
                 Name = name,
                 Parents = new[] { parent }
             };
-            FilesResource.CreateMediaUpload request = _driveService.Files.Create(file, stream, contentType);
-            return await request.UploadAsync();
+            return _driveService.Files.Create(file, stream, contentType).UploadAsync();
         }
 
-        public async Task<IUploadProgress> UpdateAsync(string fileId, Stream stream, string contentType)
+        public Task<IUploadProgress> UpdateAsync(string fileId, Stream stream, string contentType)
         {
             var file = new File();
-            FilesResource.UpdateMediaUpload request = _driveService.Files.Update(file, fileId, stream, contentType);
-            return await request.UploadAsync();
+            return _driveService.Files.Update(file, fileId, stream, contentType).UploadAsync();
         }
 
         private static FileInfo GetInfo(File file) => new FileInfo(file.Id, file.Name, file.ModifiedTime);
