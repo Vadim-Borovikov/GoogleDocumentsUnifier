@@ -35,8 +35,8 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Task<Message> messageTask =
-                client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
+            Message firstMessage =
+                await client.SendTextMessageAsync(message.Chat, "Выбери раздатки:", ParseMode.Markdown,
                 disableNotification: true);
 
             IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_sourcesUrl);
@@ -45,7 +45,6 @@ namespace MoscowNvcBot.Web.Models.Commands
             CustomCommandData data = await CreateOrClearDataAsync(client, message.Chat.Id);
             FileInfo last = infosList.Last();
 
-            Message firstMessage = await messageTask;
             data.MessageIds.Add(firstMessage.MessageId);
 
             foreach (FileInfo info in infosList)
@@ -149,12 +148,10 @@ namespace MoscowNvcBot.Web.Models.Commands
             List<Task<TempFile>> tasks = files.Select(f => f.DownloadTask).ToList();
 
             List<Task<TempFile>> runningTasks = tasks.Where(t => t.Status == TaskStatus.Running).ToList();
-            Task<Message> messageTask;
             if (runningTasks.Any())
             {
-                messageTask = client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
+                await client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
                 await Task.WhenAll(runningTasks);
-                await messageTask;
             }
 
             if (tasks.Any(t => t.Status != TaskStatus.RanToCompletion))
@@ -164,16 +161,14 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return true;
             }
 
-            messageTask = client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
+            await client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
 
             using (TempFile temp = DataManager.Unify(files.Select(CreateRequest)))
             {
-                await messageTask;
-                Task chatActionTask = client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
+                await client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
                 using (var fileStream = new FileStream(temp.Path, FileMode.Open))
                 {
                     var pdf = new InputOnlineFile(fileStream, "Раздатки.pdf");
-                    await chatActionTask;
                     await client.SendDocumentAsync(chatId, pdf);
                 }
             }
