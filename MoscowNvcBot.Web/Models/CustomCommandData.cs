@@ -12,7 +12,10 @@ namespace MoscowNvcBot.Web.Models
 
         public Task Clear(ITelegramBotClient client, long chatId)
         {
-            Parallel.ForEach(Files.Values.Select(f => f.DownloadTask), t => t.Result.Dispose());
+            foreach (GoogleFileData data in Files.Values)
+            {
+                data.DownloadTask.ContinueWith(t => t.Result.Dispose());
+            }
             Files.Clear();
 
             List<Task> tasks = MessageIds.Select(id => client.DeleteMessageAsync(chatId, id)).ToList();
