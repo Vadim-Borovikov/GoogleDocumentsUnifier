@@ -198,7 +198,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
             bool isLast = message.ReplyMarkup.InlineKeyboard.Count() == 2;
             InlineKeyboardMarkup keyboard = GetKeyboard(amount, isLast);
-            return client.EditMessageTextAsync(chatId, message.MessageId, name, replyMarkup: keyboard);
+            return client.EditMessageReplyMarkupAsync(chatId, message.MessageId, keyboard);
         }
 
         private InlineKeyboardButton GetAmountButton(uint amount, bool selected)
