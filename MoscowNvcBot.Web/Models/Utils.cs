@@ -14,7 +14,7 @@ namespace MoscowNvcBot.Web.Models
         internal static async Task<Message> FinalizeStatusMessageAsync(Message message, ITelegramBotClient client,
             string postfix = "")
         {
-            return await client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
+            return await client.EditMessageTextAsync(message.Chat, message.MessageId,
                 $"_{message.Text}_ Готово.{postfix}", ParseMode.Markdown);
         }
 
