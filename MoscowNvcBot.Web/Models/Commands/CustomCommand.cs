@@ -17,7 +17,7 @@ namespace MoscowNvcBot.Web.Models.Commands
     internal class CustomCommand : Command
     {
         internal override string Name => "custom";
-        internal override string Description => "выбрать и объединить раздатки";
+        internal override string Description => "обновить, выбрать и объединить раздатки";
 
         private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
