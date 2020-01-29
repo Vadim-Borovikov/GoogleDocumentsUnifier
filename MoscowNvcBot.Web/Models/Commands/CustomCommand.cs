@@ -43,8 +43,8 @@ namespace MoscowNvcBot.Web.Models.Commands
             CustomCommandData data = await CreateOrClearDataAsync(client, message.Chat.Id);
             FileInfo last = infosList.Last();
 
-            await messageTask;
-            data.MessageIds.Add(messageTask.Result.MessageId);
+            Message firstMessage = await messageTask;
+            data.MessageIds.Add(firstMessage.MessageId);
 
             foreach (FileInfo info in infosList)
             {
@@ -211,6 +211,10 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private static DocumentRequest CreateRequest(GoogleFileData data)
         {
+            if (!data.DownloadTask.IsCompletedSuccessfully)
+            {
+                throw new Exception("File should be downloaded already!");
+            }
             return new DocumentRequest(data.DownloadTask.Result.Path, data.Amount);
         }
     }
