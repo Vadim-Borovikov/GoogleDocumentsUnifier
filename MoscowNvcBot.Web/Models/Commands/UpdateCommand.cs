@@ -30,27 +30,34 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            await client.SendTextMessageAsync(message.Chat, "_Проверяю..._", ParseMode.Markdown);
+            Message checkingMessage =
+                await client.SendTextMessageAsync(message.Chat, "_Проверяю…_", ParseMode.Markdown);
 
             GooglePdfData[] datas = await Task.WhenAll(_sources.Select(CheckGooglePdfAsync));
+
             List<GooglePdfData> filesToUpdate = datas.Where(d => d.Status != GooglePdfData.FileStatus.Ok).ToList();
 
-            string text;
+            await client.EditMessageTextAsync(message.Chat, checkingMessage.MessageId, "_Проверяю…_ Готово.",
+                ParseMode.Markdown);
+
+            string text = $"Ссылка на папку: {_targetUrl}";
             if (filesToUpdate.Any())
             {
-                await client.SendTextMessageAsync(message.Chat, "_Обновляю..._", ParseMode.Markdown);
+                Message updatingMessage =
+                    await client.SendTextMessageAsync(message.Chat, "_Обновляю…_", ParseMode.Markdown);
 
                 IEnumerable<Task> updateTasks = filesToUpdate.Select(CreateOrUpdateAsync);
                 await Task.WhenAll(updateTasks);
 
-                text = "Готово";
+                await client.EditMessageTextAsync(message.Chat, updatingMessage.MessageId, "_Обновляю…_ Готово.",
+                    ParseMode.Markdown);
             }
             else
             {
-                text = "Раздатки уже актуальны";
+                text = $"Раздатки уже актуальны. {text}";
             }
 
-            await client.SendTextMessageAsync(message.Chat, $"{text}. Ссылка на папку: {_targetUrl}");
+            await client.SendTextMessageAsync(message.Chat, text);
         }
 
         private async Task<GooglePdfData> CheckGooglePdfAsync(string id)

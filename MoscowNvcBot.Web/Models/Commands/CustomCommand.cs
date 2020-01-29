@@ -150,8 +150,11 @@ namespace MoscowNvcBot.Web.Models.Commands
             List<Task<TempFile>> runningTasks = tasks.Where(t => t.Status == TaskStatus.Running).ToList();
             if (runningTasks.Any())
             {
-                await client.SendTextMessageAsync(chatId, "_Докачиваю..._", ParseMode.Markdown);
+                Message downloadingMessage =
+                    await client.SendTextMessageAsync(chatId, "_Докачиваю…_", ParseMode.Markdown);
                 await Task.WhenAll(runningTasks);
+                await client.EditMessageTextAsync(chatId, downloadingMessage.MessageId, "_Докачиваю…_ Готово.",
+                    ParseMode.Markdown);
             }
 
             if (tasks.Any(t => t.Status != TaskStatus.RanToCompletion))
@@ -161,10 +164,12 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return true;
             }
 
-            await client.SendTextMessageAsync(chatId, "_Объединяю..._", ParseMode.Markdown);
+            Message unifyingMessage =  await client.SendTextMessageAsync(chatId, "_Объединяю…_", ParseMode.Markdown);
 
             using (TempFile temp = DataManager.Unify(files.Select(CreateRequest)))
             {
+                await client.EditMessageTextAsync(chatId, unifyingMessage.MessageId, "_Объединяю…_ Готово.",
+                    ParseMode.Markdown);
                 await client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
                 using (var fileStream = new FileStream(temp.Path, FileMode.Open))
                 {
