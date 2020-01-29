@@ -11,6 +11,13 @@ namespace MoscowNvcBot.Web.Models
 {
     internal static class Utils
     {
+        internal static async Task<Message> FinalizeStatusMessageAsync(Message message, ITelegramBotClient client,
+            string postfix = "")
+        {
+            return await client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
+                $"_{message.Text}_ Готово.{postfix}", ParseMode.Markdown);
+        }
+
         internal static async Task UpdateAsync(Chat chat, ITelegramBotClient client, DataManager googleDataManager,
             IEnumerable<string> documentIds, string parentId)
         {
@@ -24,8 +31,7 @@ namespace MoscowNvcBot.Web.Models
 
             if (filesToUpdate.Any())
             {
-                await client.EditMessageTextAsync(chat, checkingMessage.MessageId, "_Проверяю…_ Готово.",
-                    ParseMode.Markdown);
+                await FinalizeStatusMessageAsync(checkingMessage, client);
 
                 Message updatingMessage = await client.SendTextMessageAsync(chat, "_Обновляю…_", ParseMode.Markdown);
 
@@ -33,13 +39,11 @@ namespace MoscowNvcBot.Web.Models
                     filesToUpdate.Select(f => CreateOrUpdateAsync(f, googleDataManager, parentId));
                 await Task.WhenAll(updateTasks);
 
-                await client.EditMessageTextAsync(chat, updatingMessage.MessageId, "_Обновляю…_ Готово.",
-                    ParseMode.Markdown);
+                await FinalizeStatusMessageAsync(updatingMessage, client);
             }
             else
             {
-                await client.EditMessageTextAsync(chat, checkingMessage.MessageId,
-                    "_Проверяю…_ Готово. Раздатки уже актуальны.", ParseMode.Markdown);
+                await FinalizeStatusMessageAsync(checkingMessage, client, " Раздатки уже актуальны.");
             }
         }
 
