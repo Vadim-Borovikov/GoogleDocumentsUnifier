@@ -45,7 +45,7 @@ namespace GoogleDocumentsUnifier.Logic
             }
         }
 
-        private async Task DownloadAsync(DocumentInfo info, string resultPath)
+        public async Task DownloadAsync(DocumentInfo info, string resultPath)
         {
             using (Pdf pdfWriter = Pdf.CreateWriter(resultPath))
             {

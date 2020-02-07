@@ -19,15 +19,17 @@ namespace MoscowNvcBot.Web.Models
         }
 
         internal static async Task UpdateAsync(Chat chat, ITelegramBotClient client, DataManager googleDataManager,
-            IEnumerable<string> documentIds, string parentId)
+            IEnumerable<string> documentIds, string parent,
+            Func<string, DataManager, string, Task<PdfData>> pdfAsyncChecker,
+            Func<PdfData, DataManager, string, Task> pdfAsyncCreater)
         {
-            Message checkingMessage =
-                await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown);
+            Message checkingMessage = await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown);
 
-            GooglePdfData[] datas =
-                await Task.WhenAll(documentIds.Select(id => CheckGooglePdfAsync(id, googleDataManager, parentId)));
+            List<Task<PdfData>> checkTasks =
+                documentIds.Select(id => pdfAsyncChecker(id, googleDataManager, parent)).ToList();
+            PdfData[] datas = await Task.WhenAll(checkTasks);
 
-            List<GooglePdfData> filesToUpdate = datas.Where(d => d.Status != GooglePdfData.FileStatus.Ok).ToList();
+            List<PdfData> filesToUpdate = datas.Where(d => d.Status != PdfData.FileStatus.Ok).ToList();
 
             if (filesToUpdate.Any())
             {
@@ -35,8 +37,8 @@ namespace MoscowNvcBot.Web.Models
 
                 Message updatingMessage = await client.SendTextMessageAsync(chat, "_Обновляю…_", ParseMode.Markdown);
 
-                IEnumerable<Task> updateTasks =
-                    filesToUpdate.Select(f => CreateOrUpdateAsync(f, googleDataManager, parentId));
+                List<Task> updateTasks =
+                    filesToUpdate.Select(f => pdfAsyncCreater(f, googleDataManager, parent)).ToList();
                 await Task.WhenAll(updateTasks);
 
                 await FinalizeStatusMessageAsync(updatingMessage, client);
@@ -44,48 +46,6 @@ namespace MoscowNvcBot.Web.Models
             else
             {
                 await FinalizeStatusMessageAsync(checkingMessage, client, " Раздатки уже актуальны.");
-            }
-        }
-
-        private static async Task<GooglePdfData> CheckGooglePdfAsync(string id, DataManager googleDataManager,
-            string parentId)
-        {
-            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(id);
-
-            string pdfName = $"{fileInfo.Name}.pdf";
-            FileInfo pdfInfo = await googleDataManager.FindFileInFolderAsync(parentId, pdfName);
-
-            if (pdfInfo == null)
-            {
-                return GooglePdfData.CreateNone(id, pdfName);
-            }
-
-            if (pdfInfo.ModifiedTime < fileInfo.ModifiedTime)
-            {
-                return GooglePdfData.CreateOutdated(id, pdfInfo.Id);
-            }
-
-            return GooglePdfData.CreateOk();
-        }
-
-        private static async Task CreateOrUpdateAsync(GooglePdfData data, DataManager googleDataManager,
-            string parentId)
-        {
-            var info = new DocumentInfo(data.SourceId, DocumentType.Document);
-            using (TempFile temp = await googleDataManager.DownloadAsync(info))
-            {
-                switch (data.Status)
-                {
-                    case GooglePdfData.FileStatus.None:
-                        await googleDataManager.CreateAsync(data.Name, parentId, temp.Path);
-                        break;
-                    case GooglePdfData.FileStatus.Outdated:
-                        await googleDataManager.UpdateAsync(data.Id, temp.Path);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status,
-                            "Unexpected Pdf status!");
-                }
             }
         }
     }

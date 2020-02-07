@@ -3,7 +3,7 @@
     public class DocumentRequest
     {
         internal readonly string Path;
-        internal readonly uint Amount;
+        public uint Amount;
 
         public DocumentRequest(string path, uint amount)
         {

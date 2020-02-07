@@ -10,6 +10,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
+using File = System.IO.File;
 using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
 
 namespace MoscowNvcBot.Web.Models.Commands
@@ -22,22 +23,24 @@ namespace MoscowNvcBot.Web.Models.Commands
         private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
         private readonly List<string> _documentIds;
-        private readonly string _folderId;
+        private readonly string _localPath;
         private readonly DataManager _googleDataManager;
 
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
-        public CustomCommand(List<string> documentIds, string folderId, DataManager googleDataManager)
+        public CustomCommand(List<string> documentIds, string localPath, DataManager googleDataManager)
         {
             _documentIds = documentIds;
-            _folderId = folderId;
+            _localPath = localPath;
             _googleDataManager = googleDataManager;
+            Directory.CreateDirectory(_localPath);
         }
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _documentIds, _folderId);
+            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _documentIds, _localPath,
+                CheckLocalPdfAsync, CreateOrUpdateLocalAsync);
             await SelectAsync(message.Chat, client);
         }
 
@@ -82,34 +85,66 @@ namespace MoscowNvcBot.Web.Models.Commands
             await base.HandleExceptionAsync(exception, chatId, client);
         }
 
+        private static async Task<PdfData> CheckLocalPdfAsync(string id, DataManager googleDataManager,
+            string localPath)
+        {
+            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(id);
+
+            string pdfName = $"{fileInfo.Name}.pdf";
+            string path = Path.Combine(localPath, pdfName);
+            if (!File.Exists(path))
+            {
+                return PdfData.CreateNone(id, pdfName);
+            }
+
+            if (File.GetLastWriteTime(localPath) < fileInfo.ModifiedTime)
+            {
+                return PdfData.CreateOutdated(id, localPath);
+            }
+
+            return PdfData.CreateOk();
+        }
+
+        private static async Task CreateOrUpdateLocalAsync(PdfData data, DataManager googleDataManager,
+            string localPath)
+        {
+            var info = new DocumentInfo(data.SourceId, DocumentType.Document);
+            string path = Path.Combine(localPath, data.Name);
+            switch (data.Status)
+            {
+                case PdfData.FileStatus.None:
+                case PdfData.FileStatus.Outdated:
+                    await googleDataManager.DownloadAsync(info, path);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status, "Unexpected Pdf status!");
+            }
+        }
+
         private async Task SelectAsync(Chat chat, ITelegramBotClient client)
         {
             Message firstMessage =
                 await client.SendTextMessageAsync(chat, "Выбери раздатки:", ParseMode.Markdown,
                     disableNotification: true);
 
-            IEnumerable<FileInfo> infos = await _googleDataManager.GetFilesInFolderAsync(_folderId);
-            List<FileInfo> infosList = infos.ToList();
+            string[] files = Directory.GetFiles(_localPath);
 
             CustomCommandData data = await CreateOrClearDataAsync(client, chat.Id);
-            FileInfo last = infosList.Last();
+            string last = files.Last();
 
             data.MessageIds.Add(firstMessage.MessageId);
 
-            foreach (FileInfo info in infosList)
+            foreach (string file in files)
             {
-                string name = Path.GetFileNameWithoutExtension(info.Name);
-                var docInfo = new DocumentInfo(info.Id, DocumentType.Pdf);
+                string name = Path.GetFileNameWithoutExtension(file);
 
-                Task<TempFile> downloadTask = _googleDataManager.DownloadAsync(docInfo);
+                var requset = new DocumentRequest(file, 0);
+                data.Requests.Add(name, requset);
 
-                var fileData = new GoogleFileData(downloadTask);
-                data.Files.Add(name, fileData);
-
-                bool isLast = info == last;
+                bool isLast = file == last;
                 InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
-                Message chatMessage = await client.SendTextMessageAsync(chat, name,
-                    disableNotification: !isLast, replyMarkup: keyboard);
+                Message chatMessage =
+                    await client.SendTextMessageAsync(chat, name, disableNotification: !isLast, replyMarkup: keyboard);
                 data.MessageIds.Add(chatMessage.MessageId);
             }
         }
@@ -144,36 +179,19 @@ namespace MoscowNvcBot.Web.Models.Commands
             return new InlineKeyboardMarkup(rows);
         }
 
-        private async Task<bool> GenerateAndSendAsync(ITelegramBotClient client, long chatId, CustomCommandData data)
+        private static async Task<bool> GenerateAndSendAsync(ITelegramBotClient client, long chatId,
+            CustomCommandData data)
         {
-            List<GoogleFileData> files = data.Files.Values.Where(f => f.Amount > 0).ToList();
-            if (!files.Any())
+            List<DocumentRequest> requests = data.Requests.Values.Where(f => f.Amount > 0).ToList();
+            if (!requests.Any())
             {
                 await client.SendTextMessageAsync(chatId, "Ничего не выбрано!");
                 return false;
             }
 
-            List<Task<TempFile>> tasks = files.Select(f => f.DownloadTask).ToList();
-
-            List<Task<TempFile>> runningTasks = tasks.Where(t => t.Status == TaskStatus.Running).ToList();
-            if (runningTasks.Any())
-            {
-                Message downloadingMessage =
-                    await client.SendTextMessageAsync(chatId, "_Докачиваю…_", ParseMode.Markdown);
-                await Task.WhenAll(runningTasks);
-                await Utils.FinalizeStatusMessageAsync(downloadingMessage, client);
-            }
-
-            if (tasks.Any(t => t.Status != TaskStatus.RanToCompletion))
-            {
-                await client.SendTextMessageAsync(chatId,
-                    $"Ой, что-то не вышло! Попробуй ещё раз, пожалуйста: /{Name}");
-                return true;
-            }
-
             Message unifyingMessage = await client.SendTextMessageAsync(chatId, "_Объединяю…_", ParseMode.Markdown);
 
-            using (TempFile temp = DataManager.Unify(files.Select(CreateRequest)))
+            using (TempFile temp = DataManager.Unify(requests))
             {
                 await Utils.FinalizeStatusMessageAsync(unifyingMessage, client);
                 await client.SendChatActionAsync(chatId, ChatAction.UploadDocument);
@@ -192,7 +210,7 @@ namespace MoscowNvcBot.Web.Models.Commands
         {
             string name = message.Text;
 
-            data.Files[name].Amount = amount;
+            data.Requests[name].Amount = amount;
 
             bool isLast = message.ReplyMarkup.InlineKeyboard.Count() == 2;
             InlineKeyboardMarkup keyboard = GetKeyboard(amount, isLast);
@@ -204,15 +222,6 @@ namespace MoscowNvcBot.Web.Models.Commands
             string text = selected ? $"• {amount} •" : $"{amount}";
             string callBackData = $"{Name}{amount}";
             return InlineKeyboardButton.WithCallbackData(text, callBackData);
-        }
-
-        private static DocumentRequest CreateRequest(GoogleFileData data)
-        {
-            if (!data.DownloadTask.IsCompletedSuccessfully)
-            {
-                throw new Exception("File should be downloaded already!");
-            }
-            return new DocumentRequest(data.DownloadTask.Result.Path, data.Amount);
         }
     }
 }

@@ -67,7 +67,7 @@ namespace GoogleDocumentsUnifier.Logic.Tests
                 await dataManager.UpdateAsync(TestsConfiguration.Instance.UpdatablePdfId,
                     TestsConfiguration.Instance.Pdf1Path);
 
-                await CheckGooglePdf(dataManager, TestsConfiguration.Instance.UpdatablePdfId,
+                await CheckGooglePdfWithTemp(dataManager, TestsConfiguration.Instance.UpdatablePdfId,
                     TestsConfiguration.Instance.Pdf1Pages);
 
                 await dataManager.UpdateAsync(TestsConfiguration.Instance.UpdatablePdfId,
@@ -90,11 +90,21 @@ namespace GoogleDocumentsUnifier.Logic.Tests
             Assert.AreEqual(TestsConfiguration.Instance.PdfName, info.Name);
         }
 
-        private static async Task CheckGooglePdf(DataManager dataManager, string id, int pages)
+        private static async Task CheckGooglePdfWithTemp(DataManager dataManager, string id, int pages)
         {
             var info = new DocumentInfo(id, DocumentType.Pdf);
             using (TempFile temp = await dataManager.DownloadAsync(info))
             {
+                CheckLocalPdf(temp.Path, pages);
+            }
+        }
+
+        private static async Task CheckGooglePdf(DataManager dataManager, string id, int pages)
+        {
+            var info = new DocumentInfo(id, DocumentType.Pdf);
+            using (var temp = new TempFile())
+            {
+                await dataManager.DownloadAsync(info, temp.Path);
                 CheckLocalPdf(temp.Path, pages);
             }
         }
