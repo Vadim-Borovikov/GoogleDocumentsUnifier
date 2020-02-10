@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GoogleDocumentsUnifier.Logic;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using File = System.IO.File;
+using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
 
 namespace MoscowNvcBot.Web.Models
 {
@@ -13,35 +17,58 @@ namespace MoscowNvcBot.Web.Models
         internal static async Task<Message> FinalizeStatusMessageAsync(Message message, ITelegramBotClient client,
             string postfix = "")
         {
-            return await client.EditMessageTextAsync(message.Chat, message.MessageId,
-                $"_{message.Text}_ Готово.{postfix}", ParseMode.Markdown);
+            string text = $"_{message.Text}_ Готово.{postfix}";
+            return await client.EditMessageTextAsync(message.Chat, message.MessageId, text, ParseMode.Markdown);
         }
 
-        internal static async Task UpdateAsync(Chat chat, ITelegramBotClient client, IEnumerable<string> sourceIds,
-            Func<string, Task<PdfData>> check, Func<PdfData, Task> update)
+        internal static async Task<List<PdfData>> CheckAsync(IEnumerable<string> sources,
+            Func<string, Task<PdfData>> check)
         {
-            Message checkingMessage = await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown);
+            PdfData[] datas = await Task.WhenAll(sources.Select(check));
+            return datas.Where(d => d.Status != PdfData.FileStatus.Ok).ToList();
+        }
 
-            List<Task<PdfData>> checkTasks = sourceIds.Select(check).ToList();
-            PdfData[] datas = await Task.WhenAll(checkTasks);
+        internal static async Task CreateOrUpdateAsync(IEnumerable<PdfData> sources,
+            Func<PdfData, Task> createOrUpdate)
+        {
+            List<Task> updateTasks = sources.Select(createOrUpdate).ToList();
+            await Task.WhenAll(updateTasks);
+        }
 
-            List<PdfData> filesToUpdate = datas.Where(d => d.Status != PdfData.FileStatus.Ok).ToList();
+        internal static async Task<PdfData> CheckLocalPdfAsync(string sourceId, DataManager googleDataManager,
+            string pdfFolderPath)
+        {
+            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(sourceId);
 
-            if (filesToUpdate.Any())
+            string path = Path.Combine(pdfFolderPath, $"{fileInfo.Name}.pdf");
+            if (!File.Exists(path))
             {
-                await FinalizeStatusMessageAsync(checkingMessage, client);
-
-                Message updatingMessage = await client.SendTextMessageAsync(chat, "_Обновляю…_", ParseMode.Markdown);
-
-                List<Task> updateTasks = filesToUpdate.Select(update).ToList();
-                await Task.WhenAll(updateTasks);
-
-                await FinalizeStatusMessageAsync(updatingMessage, client);
+                return PdfData.CreateNoneLocal(sourceId, path);
             }
-            else
+
+            if (File.GetLastWriteTime(path) < fileInfo.ModifiedTime)
             {
-                await FinalizeStatusMessageAsync(checkingMessage, client, " Раздатки уже актуальны.");
+                return PdfData.CreateOutdatedLocal(sourceId, path);
+            }
+
+            return PdfData.CreateOk();
+        }
+
+        internal static async Task CreateOrUpdateLocalAsync(PdfData data, DataManager googleDataManager,
+            string pdfFolderPath)
+        {
+            var info = new DocumentInfo(data.SourceId, DocumentType.Document);
+            string path = Path.Combine(pdfFolderPath, data.Name);
+            switch (data.Status)
+            {
+                case PdfData.FileStatus.None:
+                case PdfData.FileStatus.Outdated:
+                    await googleDataManager.DownloadAsync(info, path);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status, "Unexpected Pdf status!");
             }
         }
+
     }
 }

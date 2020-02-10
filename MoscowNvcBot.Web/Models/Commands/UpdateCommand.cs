@@ -1,9 +1,14 @@
 ﻿using System;
 using GoogleDocumentsUnifier.Logic;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
+using File = System.IO.File;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
@@ -14,35 +19,91 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private readonly IEnumerable<string> _sourceIds;
         private readonly string _pdfFolderId;
+        private readonly string _pdfFolderPath;
         private readonly DataManager _googleDataManager;
 
-        public UpdateCommand(IEnumerable<string> sourceIds, string pdfFolderId, DataManager googleDataManager)
+        public UpdateCommand(IEnumerable<string> sourceIds, string pdfFolderId, string pdfFolderPath,
+            DataManager googleDataManager)
         {
             _sourceIds = sourceIds;
             _pdfFolderId = pdfFolderId;
+            _pdfFolderPath = pdfFolderPath;
             _googleDataManager = googleDataManager;
         }
 
-        internal override Task ExecuteAsync(Message message, ITelegramBotClient client)
+        internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            return Utils.UpdateAsync(message.Chat, client, _sourceIds, CheckGooglePdfAsync, CreateOrUpdateGoogleAsync);
+            Message checkingMessage =
+                await client.SendTextMessageAsync(message.Chat, "_Проверяю…_", ParseMode.Markdown);
+
+            await UpdateLocalAsync();
+
+            await UpdateGoogleAsync(checkingMessage, client);
         }
 
-        private async Task<PdfData> CheckGooglePdfAsync(string sourceId)
-        {
-            FileInfo fileInfo = await _googleDataManager.GetFileInfoAsync(sourceId);
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // UpdateLocalAsync
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            string pdfName = $"{fileInfo.Name}.pdf";
+        private async Task UpdateLocalAsync()
+        {
+            List<PdfData> filesToUpdate = await Utils.CheckAsync(_sourceIds, CheckLocalAsync);
+
+            if (filesToUpdate.Any())
+            {
+                await Utils.CreateOrUpdateAsync(filesToUpdate, CreateOrUpdateLocalAsync);
+            }
+        }
+
+        private Task<PdfData> CheckLocalAsync(string id)
+        {
+            return Utils.CheckLocalPdfAsync(id, _googleDataManager, _pdfFolderPath);
+        }
+
+        private Task CreateOrUpdateLocalAsync(PdfData data)
+        {
+            return Utils.CreateOrUpdateLocalAsync(data, _googleDataManager, _pdfFolderPath);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // UpdateGoogleAsync
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        private async Task UpdateGoogleAsync(Message checkingMessage, ITelegramBotClient client)
+        {
+            IEnumerable<string> sources = Directory.EnumerateFiles(_pdfFolderPath);
+            List<PdfData> filesToUpdate = await Utils.CheckAsync(sources, CheckGooglePdfAsync);
+
+            if (filesToUpdate.Any())
+            {
+                await Utils.FinalizeStatusMessageAsync(checkingMessage, client);
+
+                Message updatingMessage =
+                    await client.SendTextMessageAsync(checkingMessage.Chat, "_Обновляю…_", ParseMode.Markdown);
+
+                await Utils.CreateOrUpdateAsync(filesToUpdate, CreateOrUpdateGoogleAsync);
+
+                await Utils.FinalizeStatusMessageAsync(updatingMessage, client);
+            }
+            else
+            {
+                await Utils.FinalizeStatusMessageAsync(checkingMessage, client, " Раздатки уже актуальны.");
+            }
+        }
+
+        private async Task<PdfData> CheckGooglePdfAsync(string path)
+        {
+            string pdfName = Path.GetFileName(path);
             FileInfo pdfInfo = await _googleDataManager.FindFileInFolderAsync(_pdfFolderId, pdfName);
 
             if (pdfInfo == null)
             {
-                return PdfData.CreateNone(sourceId, pdfName);
+                return PdfData.CreateNoneGoogle(path);
             }
 
-            if (pdfInfo.ModifiedTime < fileInfo.ModifiedTime)
+            if (pdfInfo.ModifiedTime < File.GetLastWriteTime(path))
             {
-                return PdfData.CreateOutdated(sourceId, pdfInfo.Id);
+                return PdfData.CreateOutdatedGoogle(path, pdfInfo.Id);
             }
 
             return PdfData.CreateOk();
@@ -50,21 +111,17 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private async Task CreateOrUpdateGoogleAsync(PdfData data)
         {
-            var info = new DocumentInfo(data.SourceId, DocumentType.Document);
-            using (TempFile temp = await _googleDataManager.DownloadAsync(info))
+            switch (data.Status)
             {
-                switch (data.Status)
-                {
-                    case PdfData.FileStatus.None:
-                        await _googleDataManager.CreateAsync(data.Name, _pdfFolderId, temp.Path);
-                        break;
-                    case PdfData.FileStatus.Outdated:
-                        await _googleDataManager.UpdateAsync(data.IdOrPath, temp.Path);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status,
-                            "Unexpected Pdf status!");
-                }
+                case PdfData.FileStatus.None:
+                    await _googleDataManager.CreateAsync(data.Name, _pdfFolderId, data.Path);
+                    break;
+                case PdfData.FileStatus.Outdated:
+                    await _googleDataManager.UpdateAsync(data.Id, data.Path);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status,
+                        "Unexpected Pdf status!");
             }
         }
     }

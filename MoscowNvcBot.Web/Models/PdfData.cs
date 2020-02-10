@@ -9,30 +9,42 @@
             Ok
         }
 
-        public readonly string Name;
-        public readonly string IdOrPath;
-        public readonly string SourceId;
         public readonly FileStatus Status;
 
-        public static PdfData CreateNone(string sourceId, string name)
+        public readonly string SourceId;
+        public readonly string Path;
+        public readonly string Id;
+        public string Name => System.IO.Path.GetFileName(Path);
+
+        public static PdfData CreateNoneLocal(string sourceId, string path)
         {
-            return new PdfData(FileStatus.None, sourceId, name);
+            return new PdfData(FileStatus.None, sourceId, path);
         }
 
-        public static PdfData CreateOutdated(string sourceId, string idOrPath)
+        public static PdfData CreateOutdatedLocal(string sourceId, string path)
         {
-            return new PdfData(FileStatus.Outdated, sourceId, null, idOrPath);
+            return new PdfData(FileStatus.Outdated, sourceId, path);
+        }
+
+        public static PdfData CreateNoneGoogle(string path)
+        {
+            return new PdfData(FileStatus.None, null, path);
+        }
+
+        public static PdfData CreateOutdatedGoogle(string path, string id)
+        {
+            return new PdfData(FileStatus.Outdated, null, path, id);
         }
 
         public static PdfData CreateOk() => new PdfData(FileStatus.Ok);
 
-        private PdfData(FileStatus status, string sourceId = null, string name = null, string id = null)
+        private PdfData(FileStatus status, string sourceId = null, string path = null, string id = null)
         {
-            Name = name;
-            IdOrPath = id;
-            SourceId = sourceId;
             Status = status;
+
+            SourceId = sourceId;
+            Path = path;
+            Id = id;
         }
     }
 }
-

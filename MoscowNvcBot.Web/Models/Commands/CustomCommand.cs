@@ -10,8 +10,6 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
-using File = System.IO.File;
-using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
 
 namespace MoscowNvcBot.Web.Models.Commands
 {
@@ -39,7 +37,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            await Utils.UpdateAsync(message.Chat, client, _sourceIds, CheckLocalPdfAsync, CreateOrUpdateLocalAsync);
+            await UpdateLocalAsync(message.Chat, client);
             await SelectAsync(message.Chat, client);
         }
 
@@ -84,39 +82,44 @@ namespace MoscowNvcBot.Web.Models.Commands
             await base.HandleExceptionAsync(exception, chatId, client);
         }
 
-        private async Task<PdfData> CheckLocalPdfAsync(string sourceId)
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Update
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        private async Task UpdateLocalAsync(Chat chat, ITelegramBotClient client)
         {
-            FileInfo fileInfo = await _googleDataManager.GetFileInfoAsync(sourceId);
+            Message checkingMessage = await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown);
 
-            string pdfName = $"{fileInfo.Name}.pdf";
-            string path = Path.Combine(_pdfFolderPath, pdfName);
-            if (!File.Exists(path))
+            List<PdfData> filesToUpdate = await Utils.CheckAsync(_sourceIds, CheckLocal);
+
+            if (filesToUpdate.Any())
             {
-                return PdfData.CreateNone(sourceId, pdfName);
-            }
+                await Utils.FinalizeStatusMessageAsync(checkingMessage, client);
+                Message updatingMessage = await client.SendTextMessageAsync(chat, "_Обновляю…_", ParseMode.Markdown);
 
-            if (File.GetLastWriteTime(path) < fileInfo.ModifiedTime)
+                await Utils.CreateOrUpdateAsync(filesToUpdate, CreateOrUpdateLocal);
+
+                await Utils.FinalizeStatusMessageAsync(updatingMessage, client);
+            }
+            else
             {
-                return PdfData.CreateOutdated(sourceId, path);
+                await Utils.FinalizeStatusMessageAsync(checkingMessage, client, " Раздатки уже актуальны.");
             }
-
-            return PdfData.CreateOk();
         }
 
-        private async Task CreateOrUpdateLocalAsync(PdfData data)
+        private Task<PdfData> CheckLocal(string id)
         {
-            var info = new DocumentInfo(data.SourceId, DocumentType.Document);
-            string path = Path.Combine(_pdfFolderPath, data.Name);
-            switch (data.Status)
-            {
-                case PdfData.FileStatus.None:
-                case PdfData.FileStatus.Outdated:
-                    await _googleDataManager.DownloadAsync(info, path);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status, "Unexpected Pdf status!");
-            }
+            return Utils.CheckLocalPdfAsync(id, _googleDataManager, _pdfFolderPath);
         }
+
+        private Task CreateOrUpdateLocal(PdfData data)
+        {
+            return Utils.CreateOrUpdateLocalAsync(data, _googleDataManager, _pdfFolderPath);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Select
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private async Task SelectAsync(Chat chat, ITelegramBotClient client)
         {
@@ -162,19 +165,9 @@ namespace MoscowNvcBot.Web.Models.Commands
             return data;
         }
 
-        private InlineKeyboardMarkup GetKeyboard(uint amount, bool isLast)
-        {
-            IEnumerable<InlineKeyboardButton> amountRow = Amounts.Select(a => GetAmountButton(a, amount == a));
-            if (!isLast)
-            {
-                return new InlineKeyboardMarkup(amountRow);
-            }
-
-            IEnumerable<InlineKeyboardButton> readyRow =
-                new[] { InlineKeyboardButton.WithCallbackData("Готово!", $"{Name}") };
-            var rows = new List<IEnumerable<InlineKeyboardButton>> { amountRow, readyRow };
-            return new InlineKeyboardMarkup(rows);
-        }
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // GenerateAndSendAsync
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private static async Task<bool> GenerateAndSendAsync(ITelegramBotClient client, long chatId,
             CustomCommandData data)
@@ -202,6 +195,10 @@ namespace MoscowNvcBot.Web.Models.Commands
             return true;
         }
 
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // UpdateAmountAsync
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         private Task<Message> UpdateAmountAsync(ITelegramBotClient client, long chatId, Message message,
             CustomCommandData data, uint amount)
         {
@@ -212,6 +209,24 @@ namespace MoscowNvcBot.Web.Models.Commands
             bool isLast = message.ReplyMarkup.InlineKeyboard.Count() == 2;
             InlineKeyboardMarkup keyboard = GetKeyboard(amount, isLast);
             return client.EditMessageReplyMarkupAsync(chatId, message.MessageId, keyboard);
+        }
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // GetKeyboard
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        private InlineKeyboardMarkup GetKeyboard(uint amount, bool isLast)
+        {
+            IEnumerable<InlineKeyboardButton> amountRow = Amounts.Select(a => GetAmountButton(a, amount == a));
+            if (!isLast)
+            {
+                return new InlineKeyboardMarkup(amountRow);
+            }
+
+            IEnumerable<InlineKeyboardButton> readyRow =
+                new[] { InlineKeyboardButton.WithCallbackData("Готово!", $"{Name}") };
+            var rows = new List<IEnumerable<InlineKeyboardButton>> { amountRow, readyRow };
+            return new InlineKeyboardMarkup(rows);
         }
 
         private InlineKeyboardButton GetAmountButton(uint amount, bool selected)
