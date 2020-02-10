@@ -132,7 +132,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             CustomCommandData data = await CreateOrClearDataAsync(client, chat.Id);
             string last = files.Last();
 
-            data.MessageIds.Add(firstMessage.MessageId);
+            data.AddMessage(firstMessage);
 
             foreach (string file in files)
             {
@@ -145,7 +145,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
                 Message chatMessage =
                     await client.SendTextMessageAsync(chat, name, disableNotification: !isLast, replyMarkup: keyboard);
-                data.MessageIds.Add(chatMessage.MessageId);
+                data.AddMessage(chatMessage);
             }
         }
 
