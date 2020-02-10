@@ -39,8 +39,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _sourceIds, _pdfFolderPath,
-                CheckLocalPdfAsync, CreateOrUpdateLocalAsync);
+            await Utils.UpdateAsync(message.Chat, client, _sourceIds, CheckLocalPdfAsync, CreateOrUpdateLocalAsync);
             await SelectAsync(message.Chat, client);
         }
 
@@ -85,13 +84,12 @@ namespace MoscowNvcBot.Web.Models.Commands
             await base.HandleExceptionAsync(exception, chatId, client);
         }
 
-        private static async Task<PdfData> CheckLocalPdfAsync(string sourceId, DataManager googleDataManager,
-            string localPath)
+        private async Task<PdfData> CheckLocalPdfAsync(string sourceId)
         {
-            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(sourceId);
+            FileInfo fileInfo = await _googleDataManager.GetFileInfoAsync(sourceId);
 
             string pdfName = $"{fileInfo.Name}.pdf";
-            string path = Path.Combine(localPath, pdfName);
+            string path = Path.Combine(_pdfFolderPath, pdfName);
             if (!File.Exists(path))
             {
                 return PdfData.CreateNone(sourceId, pdfName);
@@ -105,16 +103,15 @@ namespace MoscowNvcBot.Web.Models.Commands
             return PdfData.CreateOk();
         }
 
-        private static async Task CreateOrUpdateLocalAsync(PdfData data, DataManager googleDataManager,
-            string localPath)
+        private async Task CreateOrUpdateLocalAsync(PdfData data)
         {
             var info = new DocumentInfo(data.SourceId, DocumentType.Document);
-            string path = Path.Combine(localPath, data.Name);
+            string path = Path.Combine(_pdfFolderPath, data.Name);
             switch (data.Status)
             {
                 case PdfData.FileStatus.None:
                 case PdfData.FileStatus.Outdated:
-                    await googleDataManager.DownloadAsync(info, path);
+                    await _googleDataManager.DownloadAsync(info, path);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(data.Status), data.Status, "Unexpected Pdf status!");

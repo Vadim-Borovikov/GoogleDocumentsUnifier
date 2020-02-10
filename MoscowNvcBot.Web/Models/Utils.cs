@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GoogleDocumentsUnifier.Logic;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -18,15 +17,12 @@ namespace MoscowNvcBot.Web.Models
                 $"_{message.Text}_ Готово.{postfix}", ParseMode.Markdown);
         }
 
-        internal static async Task UpdateAsync(Chat chat, ITelegramBotClient client, DataManager googleDataManager,
-            IEnumerable<string> sourceIds, string parent,
-            Func<string, DataManager, string, Task<PdfData>> pdfAsyncChecker,
-            Func<PdfData, DataManager, string, Task> pdfAsyncCreater)
+        internal static async Task UpdateAsync(Chat chat, ITelegramBotClient client, IEnumerable<string> sourceIds,
+            Func<string, Task<PdfData>> check, Func<PdfData, Task> update)
         {
             Message checkingMessage = await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown);
 
-            List<Task<PdfData>> checkTasks =
-                sourceIds.Select(id => pdfAsyncChecker(id, googleDataManager, parent)).ToList();
+            List<Task<PdfData>> checkTasks = sourceIds.Select(check).ToList();
             PdfData[] datas = await Task.WhenAll(checkTasks);
 
             List<PdfData> filesToUpdate = datas.Where(d => d.Status != PdfData.FileStatus.Ok).ToList();
@@ -37,8 +33,7 @@ namespace MoscowNvcBot.Web.Models
 
                 Message updatingMessage = await client.SendTextMessageAsync(chat, "_Обновляю…_", ParseMode.Markdown);
 
-                List<Task> updateTasks =
-                    filesToUpdate.Select(f => pdfAsyncCreater(f, googleDataManager, parent)).ToList();
+                List<Task> updateTasks = filesToUpdate.Select(update).ToList();
                 await Task.WhenAll(updateTasks);
 
                 await FinalizeStatusMessageAsync(updatingMessage, client);
