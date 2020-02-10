@@ -22,16 +22,16 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
-        private readonly List<string> _documentIds;
+        private readonly List<string> _sourceIds;
         private readonly string _pdfFolderPath;
         private readonly DataManager _googleDataManager;
 
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
-        public CustomCommand(List<string> documentIds, string pdfFolderPath, DataManager googleDataManager)
+        public CustomCommand(List<string> sourceIds, string pdfFolderPath, DataManager googleDataManager)
         {
-            _documentIds = documentIds;
+            _sourceIds = sourceIds;
             _pdfFolderPath = pdfFolderPath;
             _googleDataManager = googleDataManager;
             Directory.CreateDirectory(_pdfFolderPath);
@@ -39,7 +39,7 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _documentIds, _pdfFolderPath,
+            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _sourceIds, _pdfFolderPath,
                 CheckLocalPdfAsync, CreateOrUpdateLocalAsync);
             await SelectAsync(message.Chat, client);
         }
@@ -85,21 +85,21 @@ namespace MoscowNvcBot.Web.Models.Commands
             await base.HandleExceptionAsync(exception, chatId, client);
         }
 
-        private static async Task<PdfData> CheckLocalPdfAsync(string id, DataManager googleDataManager,
+        private static async Task<PdfData> CheckLocalPdfAsync(string sourceId, DataManager googleDataManager,
             string localPath)
         {
-            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(id);
+            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(sourceId);
 
             string pdfName = $"{fileInfo.Name}.pdf";
             string path = Path.Combine(localPath, pdfName);
             if (!File.Exists(path))
             {
-                return PdfData.CreateNone(id, pdfName);
+                return PdfData.CreateNone(sourceId, pdfName);
             }
 
             if (File.GetLastWriteTime(path) < fileInfo.ModifiedTime)
             {
-                return PdfData.CreateOutdated(id, path);
+                return PdfData.CreateOutdated(sourceId, path);
             }
 
             return PdfData.CreateOk();

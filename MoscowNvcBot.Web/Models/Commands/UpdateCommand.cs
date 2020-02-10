@@ -12,39 +12,39 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "update";
         internal override string Description => "обновить раздатки на Диске";
 
-        private readonly IEnumerable<string> _sources;
+        private readonly IEnumerable<string> _sourceIds;
         private readonly string _pdfFolderId;
         private readonly DataManager _googleDataManager;
 
-        public UpdateCommand(IEnumerable<string> sources, string pdfFolderId, DataManager googleDataManager)
+        public UpdateCommand(IEnumerable<string> sourceIds, string pdfFolderId, DataManager googleDataManager)
         {
-            _sources = sources;
+            _sourceIds = sourceIds;
             _pdfFolderId = pdfFolderId;
             _googleDataManager = googleDataManager;
         }
 
         internal override Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            return Utils.UpdateAsync(message.Chat, client, _googleDataManager, _sources, _pdfFolderId,
+            return Utils.UpdateAsync(message.Chat, client, _googleDataManager, _sourceIds, _pdfFolderId,
                 CheckGooglePdfAsync, CreateOrUpdateGoogleAsync);
         }
 
-        private static async Task<PdfData> CheckGooglePdfAsync(string id, DataManager googleDataManager,
+        private static async Task<PdfData> CheckGooglePdfAsync(string sourceId, DataManager googleDataManager,
             string parentId)
         {
-            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(id);
+            FileInfo fileInfo = await googleDataManager.GetFileInfoAsync(sourceId);
 
             string pdfName = $"{fileInfo.Name}.pdf";
             FileInfo pdfInfo = await googleDataManager.FindFileInFolderAsync(parentId, pdfName);
 
             if (pdfInfo == null)
             {
-                return PdfData.CreateNone(id, pdfName);
+                return PdfData.CreateNone(sourceId, pdfName);
             }
 
             if (pdfInfo.ModifiedTime < fileInfo.ModifiedTime)
             {
-                return PdfData.CreateOutdated(id, pdfInfo.Id);
+                return PdfData.CreateOutdated(sourceId, pdfInfo.Id);
             }
 
             return PdfData.CreateOk();

@@ -19,14 +19,14 @@ namespace MoscowNvcBot.Web.Models
         }
 
         internal static async Task UpdateAsync(Chat chat, ITelegramBotClient client, DataManager googleDataManager,
-            IEnumerable<string> documentIds, string parent,
+            IEnumerable<string> sourceIds, string parent,
             Func<string, DataManager, string, Task<PdfData>> pdfAsyncChecker,
             Func<PdfData, DataManager, string, Task> pdfAsyncCreater)
         {
             Message checkingMessage = await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown);
 
             List<Task<PdfData>> checkTasks =
-                documentIds.Select(id => pdfAsyncChecker(id, googleDataManager, parent)).ToList();
+                sourceIds.Select(id => pdfAsyncChecker(id, googleDataManager, parent)).ToList();
             PdfData[] datas = await Task.WhenAll(checkTasks);
 
             List<PdfData> filesToUpdate = datas.Where(d => d.Status != PdfData.FileStatus.Ok).ToList();
