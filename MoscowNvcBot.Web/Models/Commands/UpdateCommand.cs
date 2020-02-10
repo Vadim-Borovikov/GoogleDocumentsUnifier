@@ -13,19 +13,19 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Description => "обновить раздатки на Диске";
 
         private readonly IEnumerable<string> _sources;
-        private readonly string _targetId;
+        private readonly string _pdfFolderId;
         private readonly DataManager _googleDataManager;
 
-        public UpdateCommand(IEnumerable<string> sources, string targetId, DataManager googleDataManager)
+        public UpdateCommand(IEnumerable<string> sources, string pdfFolderId, DataManager googleDataManager)
         {
             _sources = sources;
-            _targetId = targetId;
+            _pdfFolderId = pdfFolderId;
             _googleDataManager = googleDataManager;
         }
 
         internal override Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            return Utils.UpdateAsync(message.Chat, client, _googleDataManager, _sources, _targetId,
+            return Utils.UpdateAsync(message.Chat, client, _googleDataManager, _sources, _pdfFolderId,
                 CheckGooglePdfAsync, CreateOrUpdateGoogleAsync);
         }
 

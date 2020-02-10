@@ -14,9 +14,9 @@ namespace MoscowNvcBot.Web.Models
 
         public List<string> DocumentIds { get; set; }
 
-        public string FolderId { get; set; }
+        public string PdfFolderId { get; set; }
 
-        public string LocalPath { get; set; }
+        public string PdfFolderPath { get; set; }
 
         public string Url => $"{Host}:{Port}/{Token}";
 

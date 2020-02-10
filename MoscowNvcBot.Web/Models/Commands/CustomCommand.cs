@@ -23,23 +23,23 @@ namespace MoscowNvcBot.Web.Models.Commands
         private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
 
         private readonly List<string> _documentIds;
-        private readonly string _localPath;
+        private readonly string _pdfFolderPath;
         private readonly DataManager _googleDataManager;
 
         private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
             new ConcurrentDictionary<long, CustomCommandData>();
 
-        public CustomCommand(List<string> documentIds, string localPath, DataManager googleDataManager)
+        public CustomCommand(List<string> documentIds, string pdfFolderPath, DataManager googleDataManager)
         {
             _documentIds = documentIds;
-            _localPath = localPath;
+            _pdfFolderPath = pdfFolderPath;
             _googleDataManager = googleDataManager;
-            Directory.CreateDirectory(_localPath);
+            Directory.CreateDirectory(_pdfFolderPath);
         }
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _documentIds, _localPath,
+            await Utils.UpdateAsync(message.Chat, client, _googleDataManager, _documentIds, _pdfFolderPath,
                 CheckLocalPdfAsync, CreateOrUpdateLocalAsync);
             await SelectAsync(message.Chat, client);
         }
@@ -97,9 +97,9 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return PdfData.CreateNone(id, pdfName);
             }
 
-            if (File.GetLastWriteTime(localPath) < fileInfo.ModifiedTime)
+            if (File.GetLastWriteTime(path) < fileInfo.ModifiedTime)
             {
-                return PdfData.CreateOutdated(id, localPath);
+                return PdfData.CreateOutdated(id, path);
             }
 
             return PdfData.CreateOk();
@@ -127,7 +127,7 @@ namespace MoscowNvcBot.Web.Models.Commands
                 await client.SendTextMessageAsync(chat, "Выбери раздатки:", ParseMode.Markdown,
                     disableNotification: true);
 
-            string[] files = Directory.GetFiles(_localPath);
+            string[] files = Directory.GetFiles(_pdfFolderPath);
 
             CustomCommandData data = await CreateOrClearDataAsync(client, chat.Id);
             string last = files.Last();

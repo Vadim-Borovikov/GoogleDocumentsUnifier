@@ -28,8 +28,8 @@ namespace MoscowNvcBot.Web.Models.Services
 
             var commands = new List<Command>
             {
-                new CustomCommand(_config.DocumentIds, _config.LocalPath, _googleDataManager),
-                new UpdateCommand(_config.DocumentIds, _config.FolderId, _googleDataManager),
+                new CustomCommand(_config.DocumentIds, _config.PdfFolderPath, _googleDataManager),
+                new UpdateCommand(_config.DocumentIds, _config.PdfFolderId, _googleDataManager),
                 new CheckListCommand(_config.CheckList)
             };
 
