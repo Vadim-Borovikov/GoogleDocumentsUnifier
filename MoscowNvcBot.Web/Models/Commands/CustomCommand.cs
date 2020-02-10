@@ -127,21 +127,19 @@ namespace MoscowNvcBot.Web.Models.Commands
                 await client.SendTextMessageAsync(chat, "Выбери раздатки:", ParseMode.Markdown,
                     disableNotification: true);
 
-            string[] files = Directory.GetFiles(_pdfFolderPath);
+            string[] paths = Directory.GetFiles(_pdfFolderPath);
 
             CustomCommandData data = await CreateOrClearDataAsync(client, chat.Id);
-            string last = files.Last();
+            string last = paths.Last();
 
             data.AddMessage(firstMessage);
 
-            foreach (string file in files)
+            foreach (string path in paths)
             {
-                string name = Path.GetFileNameWithoutExtension(file);
+                string name = Path.GetFileNameWithoutExtension(path);
+                data.AddPdf(name);
 
-                var requset = new DocumentRequest(file, 0);
-                data.Requests.Add(name, requset);
-
-                bool isLast = file == last;
+                bool isLast = path == last;
                 InlineKeyboardMarkup keyboard = GetKeyboard(0, isLast);
                 Message chatMessage =
                     await client.SendTextMessageAsync(chat, name, disableNotification: !isLast, replyMarkup: keyboard);
@@ -169,10 +167,9 @@ namespace MoscowNvcBot.Web.Models.Commands
         // GenerateAndSendAsync
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        private static async Task<bool> GenerateAndSendAsync(ITelegramBotClient client, long chatId,
-            CustomCommandData data)
+        private async Task<bool> GenerateAndSendAsync(ITelegramBotClient client, long chatId, CustomCommandData data)
         {
-            List<DocumentRequest> requests = data.Requests.Values.Where(f => f.Amount > 0).ToList();
+            IReadOnlyList<DocumentRequest> requests = data.GetRequestedPdfs(_pdfFolderPath);
             if (!requests.Any())
             {
                 await client.SendTextMessageAsync(chatId, "Ничего не выбрано!");
@@ -202,9 +199,7 @@ namespace MoscowNvcBot.Web.Models.Commands
         private Task<Message> UpdateAmountAsync(ITelegramBotClient client, long chatId, Message message,
             CustomCommandData data, uint amount)
         {
-            string name = message.Text;
-
-            data.Requests[name].Amount = amount;
+            data.UpdatePdfAmount(message.Text, amount);
 
             bool isLast = message.ReplyMarkup.InlineKeyboard.Count() == 2;
             InlineKeyboardMarkup keyboard = GetKeyboard(amount, isLast);
