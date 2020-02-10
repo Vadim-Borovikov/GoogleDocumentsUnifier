@@ -33,8 +33,8 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
         {
-            Message checkingMessage =
-                await client.SendTextMessageAsync(message.Chat, "_Проверяю…_", ParseMode.Markdown);
+            Message checkingMessage = await client.SendTextMessageAsync(message.Chat, "_Проверяю…_",
+                ParseMode.Markdown, disableNotification: true);
 
             await UpdateLocalAsync();
 
@@ -78,8 +78,8 @@ namespace MoscowNvcBot.Web.Models.Commands
             {
                 await Utils.FinalizeStatusMessageAsync(checkingMessage, client);
 
-                Message updatingMessage =
-                    await client.SendTextMessageAsync(checkingMessage.Chat, "_Обновляю…_", ParseMode.Markdown);
+                Message updatingMessage = await client.SendTextMessageAsync(checkingMessage.Chat, "_Обновляю…_",
+                    ParseMode.Markdown, disableNotification: true);
 
                 await Utils.CreateOrUpdateAsync(filesToUpdate, CreateOrUpdateGoogleAsync);
 

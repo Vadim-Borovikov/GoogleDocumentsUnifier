@@ -88,14 +88,16 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         private async Task UpdateLocalAsync(Chat chat, ITelegramBotClient client)
         {
-            Message checkingMessage = await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown);
+            Message checkingMessage =
+                await client.SendTextMessageAsync(chat, "_Проверяю…_", ParseMode.Markdown, disableNotification: true);
 
             List<PdfData> filesToUpdate = await Utils.CheckAsync(_sourceIds, CheckLocal);
 
             if (filesToUpdate.Any())
             {
                 await Utils.FinalizeStatusMessageAsync(checkingMessage, client);
-                Message updatingMessage = await client.SendTextMessageAsync(chat, "_Обновляю…_", ParseMode.Markdown);
+                Message updatingMessage = await client.SendTextMessageAsync(chat, "_Обновляю…_", ParseMode.Markdown,
+                    disableNotification: true);
 
                 await Utils.CreateOrUpdateAsync(filesToUpdate, CreateOrUpdateLocal);
 
@@ -176,7 +178,8 @@ namespace MoscowNvcBot.Web.Models.Commands
                 return false;
             }
 
-            Message unifyingMessage = await client.SendTextMessageAsync(chatId, "_Объединяю…_", ParseMode.Markdown);
+            Message unifyingMessage = await client.SendTextMessageAsync(chatId, "_Объединяю…_", ParseMode.Markdown,
+                disableNotification: true);
 
             using (TempFile temp = DataManager.Unify(requests))
             {
