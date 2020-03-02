@@ -7,6 +7,7 @@ using GoogleDocumentsUnifier.Logic;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 using File = System.IO.File;
 using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
 
@@ -72,5 +73,27 @@ namespace MoscowNvcBot.Web.Models
             }
         }
 
+        internal static Task SendMessage(BotConfiguration.Link link, Chat chat, ITelegramBotClient client)
+        {
+            if (link.MakeButton)
+            {
+                InlineKeyboardMarkup keyboard = GetReplyMarkup(link);
+                return
+                    client.SendTextMessageAsync(chat, link.Name, replyMarkup: keyboard, disableWebPagePreview: true);
+            }
+
+            string text = $"[{link.Name}]({link.Url})";
+            return client.SendTextMessageAsync(chat, text, ParseMode.Markdown);
+        }
+
+        private static InlineKeyboardMarkup GetReplyMarkup(BotConfiguration.Link link)
+        {
+            var button = new InlineKeyboardButton
+            {
+                Text = "Открыть",
+                Url = link.Url
+            };
+            return new InlineKeyboardMarkup(button);
+        }
     }
 }

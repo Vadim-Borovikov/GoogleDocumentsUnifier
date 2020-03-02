@@ -44,5 +44,7 @@ namespace MoscowNvcBot.Web.Models
         public List<int> AdminIds { get; set; }
 
         public List<Link> Links { get; set; }
+
+        public Link FeedbackLink { get; set; }
     }
 }
