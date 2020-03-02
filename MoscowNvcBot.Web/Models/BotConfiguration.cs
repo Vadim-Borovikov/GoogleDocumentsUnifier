@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace MoscowNvcBot.Web.Models
@@ -9,6 +10,10 @@ namespace MoscowNvcBot.Web.Models
         public string Host { get; set; }
 
         public int Port { get; set; }
+
+        public int PingPeriodSeconds { get; set; }
+
+        public TimeSpan PingPeriod => TimeSpan.FromSeconds(PingPeriodSeconds);
 
         public string GoogleProjectJson { get; set; }
 

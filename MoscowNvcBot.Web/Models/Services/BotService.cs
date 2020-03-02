@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GoogleDocumentsUnifier.Logic;
@@ -16,15 +19,17 @@ namespace MoscowNvcBot.Web.Models.Services
 
         private readonly BotConfiguration _config;
 
-        private readonly DataManager _googleDataManager;
+        private DataManager _googleDataManager;
+
+        private CancellationTokenSource _periodicCancellationSource;
+        private Ping _ping;
+        private readonly string _pingUrl;
 
         public BotService(IOptions<BotConfiguration> options)
         {
             _config = options.Value;
 
             Client = new TelegramBotClient(_config.Token);
-
-            _googleDataManager = new DataManager(_config.GoogleProjectJson);
 
             var commands = new List<Command>
             {
@@ -34,20 +39,39 @@ namespace MoscowNvcBot.Web.Models.Services
             };
 
             Commands = commands.AsReadOnly();
-            var startCommand = new StartCommand(Commands, _config.Host);
+            var startCommand = new StartCommand(Commands);
 
             commands.Insert(0, startCommand);
+
+            var uri = new Uri(_config.Url);
+            _pingUrl = uri.Host;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
+            _googleDataManager = new DataManager(_config.GoogleProjectJson);
+            _periodicCancellationSource = new CancellationTokenSource();
+            _ping = new Ping();
+            StartPeriodicPing(_periodicCancellationSource.Token);
+
             return Client.SetWebhookAsync(_config.Url, cancellationToken: cancellationToken);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
             _googleDataManager.Dispose();
+            _periodicCancellationSource.Cancel();
+            _ping.Dispose();
+            _periodicCancellationSource.Dispose();
             return Client.DeleteWebhookAsync(cancellationToken);
         }
+
+        private void StartPeriodicPing(CancellationToken cancellationToken)
+        {
+            IObservable<long> observable = Observable.Interval(_config.PingPeriod);
+            observable.Subscribe(PingSite, cancellationToken);
+        }
+
+        private void PingSite(long _) => _ping.Send(_pingUrl);
     }
 }
