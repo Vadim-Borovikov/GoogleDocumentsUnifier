@@ -18,15 +18,7 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "custom";
         internal override string Description => "обновить, выбрать и объединить раздатки";
 
-        private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
-
-        private readonly List<string> _sourceIds;
-        private readonly string _pdfFolderPath;
-        private readonly DataManager _googleDataManager;
-
-        private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
-            new ConcurrentDictionary<long, CustomCommandData>();
-
+        internal override bool AdminsOnly => true;
         public CustomCommand(List<string> sourceIds, string pdfFolderPath, DataManager googleDataManager)
         {
             _sourceIds = sourceIds;
@@ -35,13 +27,13 @@ namespace MoscowNvcBot.Web.Models.Commands
             Directory.CreateDirectory(_pdfFolderPath);
         }
 
-        internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
+        protected override async Task ExecuteAsync(Message message, ITelegramBotClient client, bool _)
         {
             await UpdateLocalAsync(message.Chat, client);
             await SelectAsync(message.Chat, client);
         }
 
-        internal override async Task InvokeAsync(Message message, ITelegramBotClient client, string data)
+        protected override async Task InvokeAsync(Message message, ITelegramBotClient client, string data)
         {
             long chatId = message.Chat.Id;
             bool success = ChatData.TryGetValue(chatId, out CustomCommandData commandData);
@@ -233,5 +225,14 @@ namespace MoscowNvcBot.Web.Models.Commands
             string callBackData = $"{Name}{amount}";
             return InlineKeyboardButton.WithCallbackData(text, callBackData);
         }
+
+        private static readonly uint[] Amounts = { 0, 1, 5, 10, 20 };
+
+        private static readonly ConcurrentDictionary<long, CustomCommandData> ChatData =
+            new ConcurrentDictionary<long, CustomCommandData>();
+
+        private readonly List<string> _sourceIds;
+        private readonly string _pdfFolderPath;
+        private readonly DataManager _googleDataManager;
     }
 }

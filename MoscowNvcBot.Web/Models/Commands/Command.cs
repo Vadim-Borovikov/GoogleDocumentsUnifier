@@ -15,11 +15,18 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal bool Contains(Message message) => (message.Type == MessageType.Text) && message.Text.Contains(Name);
 
-        internal abstract Task ExecuteAsync(Message message, ITelegramBotClient client);
+        internal virtual bool AdminsOnly => false;
 
-        internal virtual Task InvokeAsync(Message message, ITelegramBotClient client, string data)
+        internal Task ExecuteAsyncWrapper(Message message, ITelegramBotClient client, bool fromAdmin)
         {
-            return Task.CompletedTask;
+            CheckAccess(message.From, fromAdmin);
+            return ExecuteAsync(message, client, fromAdmin);
+        }
+
+        internal Task InvokeAsyncWrapper(Message message, ITelegramBotClient client, string data, bool fromAdmin)
+        {
+            CheckAccess(message.From, fromAdmin);
+            return InvokeAsync(message, client, data);
         }
 
         internal virtual Task HandleExceptionAsync(Exception exception, long chatId, ITelegramBotClient client)
@@ -30,6 +37,13 @@ namespace MoscowNvcBot.Web.Models.Commands
             }
 
             return HandleUsageLimitExcessAsync(chatId, client);
+        }
+
+        protected abstract Task ExecuteAsync(Message message, ITelegramBotClient client, bool fromAdmin);
+
+        protected virtual Task InvokeAsync(Message message, ITelegramBotClient client, string data)
+        {
+            return Task.CompletedTask;
         }
 
         private static bool IsUsageLimitExceed(Exception exception)
@@ -43,6 +57,15 @@ namespace MoscowNvcBot.Web.Models.Commands
         {
             return client.SendTextMessageAsync(chatId,
                 "Google хочет отдохнуть от меня какое-то время. Попробуй позже, пожалуйста!");
+        }
+
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
+        private void CheckAccess(User user, bool isAdmin)
+        {
+            if (AdminsOnly && !isAdmin)
+            {
+                throw new Exception($"User @{user} is not in admin list!");
+            }
         }
 
         private const int UsageLimitsExceededCode = 403;

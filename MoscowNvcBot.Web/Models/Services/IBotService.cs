@@ -7,6 +7,7 @@ namespace MoscowNvcBot.Web.Models.Services
     public interface IBotService
     {
         TelegramBotClient Client { get; }
-        IReadOnlyList<Command> Commands { get; }
+        IReadOnlyCollection<Command> Commands { get; }
+        IEnumerable<int> AdminIds { get; }
     }
 }

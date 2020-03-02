@@ -15,15 +15,8 @@ namespace MoscowNvcBot.Web.Models.Services
     internal class BotService : IBotService, IHostedService
     {
         public TelegramBotClient Client { get; }
-        public IReadOnlyList<Command> Commands { get; }
-
-        private readonly BotConfiguration _config;
-
-        private DataManager _googleDataManager;
-
-        private CancellationTokenSource _periodicCancellationSource;
-        private Ping _ping;
-        private readonly string _pingUrl;
+        public IReadOnlyCollection<Command> Commands { get; }
+        public IEnumerable<int> AdminIds => _config.AdminIds;
 
         public BotService(IOptions<BotConfiguration> options)
         {
@@ -73,5 +66,13 @@ namespace MoscowNvcBot.Web.Models.Services
         }
 
         private void PingSite(long _) => _ping.Send(_pingUrl);
+
+        private readonly BotConfiguration _config;
+
+        private DataManager _googleDataManager;
+
+        private CancellationTokenSource _periodicCancellationSource;
+        private Ping _ping;
+        private readonly string _pingUrl;
     }
 }

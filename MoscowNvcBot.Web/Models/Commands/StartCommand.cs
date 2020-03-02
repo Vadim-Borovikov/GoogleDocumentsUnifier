@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -11,24 +12,24 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "start";
         internal override string Description => "список команд";
 
-        private readonly IReadOnlyList<Command> _commands;
-
-        public StartCommand(IReadOnlyList<Command> commands)
+        public StartCommand(IReadOnlyCollection<Command> commands)
         {
             _commands = commands;
         }
 
-        internal override Task ExecuteAsync(Message message, ITelegramBotClient client)
+        protected override Task ExecuteAsync(Message message, ITelegramBotClient client, bool fromAdmin)
         {
             var builder = new StringBuilder();
             builder.AppendLine("Привет!");
             builder.AppendLine();
-            foreach (Command command in _commands)
+            foreach (Command command in _commands.Where(c => !c.AdminsOnly || fromAdmin))
             {
                 builder.AppendLine($"/{command.Name} – {command.Description}");
             }
 
             return client.SendTextMessageAsync(message.Chat, builder.ToString());
         }
+
+        private readonly IReadOnlyCollection<Command> _commands;
     }
 }

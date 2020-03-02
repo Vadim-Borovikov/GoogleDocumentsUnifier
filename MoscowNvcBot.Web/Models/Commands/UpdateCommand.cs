@@ -17,10 +17,7 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "update";
         internal override string Description => "обновить раздатки на Диске";
 
-        private readonly IEnumerable<string> _sourceIds;
-        private readonly string _pdfFolderId;
-        private readonly string _pdfFolderPath;
-        private readonly DataManager _googleDataManager;
+        internal override bool AdminsOnly => true;
 
         public UpdateCommand(IEnumerable<string> sourceIds, string pdfFolderId, string pdfFolderPath,
             DataManager googleDataManager)
@@ -31,7 +28,7 @@ namespace MoscowNvcBot.Web.Models.Commands
             _googleDataManager = googleDataManager;
         }
 
-        internal override async Task ExecuteAsync(Message message, ITelegramBotClient client)
+        protected override async Task ExecuteAsync(Message message, ITelegramBotClient client, bool _)
         {
             Message checkingMessage = await client.SendTextMessageAsync(message.Chat, "_Проверяю…_",
                 ParseMode.Markdown, disableNotification: true);
@@ -124,5 +121,10 @@ namespace MoscowNvcBot.Web.Models.Commands
                         "Unexpected Pdf status!");
             }
         }
+
+        private readonly IEnumerable<string> _sourceIds;
+        private readonly string _pdfFolderId;
+        private readonly string _pdfFolderPath;
+        private readonly DataManager _googleDataManager;
     }
 }

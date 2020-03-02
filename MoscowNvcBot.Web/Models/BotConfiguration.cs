@@ -1,3 +1,7 @@
+// ReSharper disable MemberCanBeInternal
+// ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable CollectionNeverUpdated.Global
 using System;
 using System.Collections.Generic;
 
@@ -28,5 +32,7 @@ namespace MoscowNvcBot.Web.Models
         public List<string> CheckListLines { get; set; }
 
         public string CheckList => string.Join('\n', CheckListLines);
+
+        public List<int> AdminIds { get; set; }
     }
 }
