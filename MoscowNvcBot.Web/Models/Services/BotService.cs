@@ -24,6 +24,8 @@ namespace MoscowNvcBot.Web.Models.Services
 
             Client = new TelegramBotClient(_config.Token);
 
+            _googleDataManager = new DataManager(_config.GoogleProjectJson);
+
             var commands = new List<Command>
             {
                 new CustomCommand(_config.DocumentIds, _config.PdfFolderPath, _googleDataManager),
@@ -44,7 +46,6 @@ namespace MoscowNvcBot.Web.Models.Services
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _googleDataManager = new DataManager(_config.GoogleProjectJson);
             _periodicCancellationSource = new CancellationTokenSource();
             _ping = new Ping();
             StartPeriodicPing(_periodicCancellationSource.Token);
