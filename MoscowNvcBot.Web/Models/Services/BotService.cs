@@ -32,7 +32,8 @@ namespace MoscowNvcBot.Web.Models.Services
                 new UpdateCommand(_config.DocumentIds, _config.PdfFolderId, _config.PdfFolderPath, _googleDataManager),
                 new CheckListCommand(_config.CheckList),
                 new LinksCommand(_config.Links),
-                new FeedbackCommand(_config.FeedbackLink)
+                new FeedbackCommand(_config.FeedbackLink),
+                new ThanksCommand(_config.Payees)
             };
 
             Commands = commands.AsReadOnly();

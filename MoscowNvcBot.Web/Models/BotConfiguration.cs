@@ -17,6 +17,19 @@ namespace MoscowNvcBot.Web.Models
             public bool MakeButton { get; set; }
         }
 
+        public class Payee
+        {
+            public class Account
+            {
+                public string Bank { get; set; }
+                public string CardNumber { get; set; }
+            }
+
+            public string Name { get; set; }
+            public int? Id { get; set; }
+            public List<Account> Accounts { get; set; }
+        }
+
         public string Token { get; set; }
 
         public string Host { get; set; }
@@ -46,5 +59,7 @@ namespace MoscowNvcBot.Web.Models
         public List<Link> Links { get; set; }
 
         public Link FeedbackLink { get; set; }
+
+        public List<Payee> Payees { get; set; }
     }
 }

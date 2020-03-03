@@ -7,6 +7,7 @@ using GoogleDocumentsUnifier.Logic;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 using File = System.IO.File;
 using FileInfo = GoogleDocumentsUnifier.Logic.FileInfo;
@@ -86,6 +87,30 @@ namespace MoscowNvcBot.Web.Models
             return client.SendTextMessageAsync(chat, text, ParseMode.Markdown);
         }
 
+        internal static async Task SendMessage(BotConfiguration.Payee payee, Chat chat, ITelegramBotClient client)
+        {
+            InputOnlineFile photo = await GetUserProfilePhotoId(client, payee.Id);
+            string caption = GetCaption(payee.Name, payee.Accounts);
+            await client.SendPhotoAsync(chat, photo, caption, ParseMode.Markdown);
+        }
+
+        private static async Task<InputOnlineFile> GetUserProfilePhotoId(ITelegramBotClient client, int? userId)
+        {
+            int id;
+            if (userId.HasValue)
+            {
+                id = userId.Value;
+            }
+            else
+            {
+                User me = await client.GetMeAsync();
+                id = me.Id;
+            }
+            UserProfilePhotos photos = await client.GetUserProfilePhotosAsync(id, 0, 1);
+            string photoId = photos.Photos.First().First().FileId;
+            return new InputOnlineFile(photoId);
+        }
+
         private static InlineKeyboardMarkup GetReplyMarkup(BotConfiguration.Link link)
         {
             var button = new InlineKeyboardButton
@@ -94,6 +119,17 @@ namespace MoscowNvcBot.Web.Models
                 Url = link.Url
             };
             return new InlineKeyboardMarkup(button);
+        }
+
+        private static string GetCaption(string name, IEnumerable<BotConfiguration.Payee.Account> accounts)
+        {
+            string options = string.Join($" или{Environment.NewLine}", accounts.Select(GetText));
+            return $"{name}:{Environment.NewLine}{options}";
+        }
+
+        private static string GetText(BotConfiguration.Payee.Account account)
+        {
+            return $"`{account.CardNumber}` в {account.Bank}";
         }
     }
 }
