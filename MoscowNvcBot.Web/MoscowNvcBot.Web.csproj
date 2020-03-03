@@ -21,11 +21,27 @@
 
 
   <ItemGroup>
+    <Folder Include="Photos\" />
     <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
 
 
   <ItemGroup>
+    <None Update="Photos\Kventr.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Photos\magalexy.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Photos\mariaoleneva.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Photos\moscow_nvc_bot.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Photos\Netris.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="unifying.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

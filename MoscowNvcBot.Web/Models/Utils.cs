@@ -89,28 +89,13 @@ namespace MoscowNvcBot.Web.Models
 
         internal static async Task SendMessage(BotConfiguration.Payee payee, Chat chat, ITelegramBotClient client)
         {
-            InputOnlineFile photo = await GetUserProfilePhotoId(client, payee.Id);
-            string caption = GetCaption(payee.Name, payee.Accounts);
-            await client.SendPhotoAsync(chat, photo, caption, ParseMode.Markdown);
-        }
-
-        private static async Task<InputOnlineFile> GetUserProfilePhotoId(ITelegramBotClient client, int? userId)
-        {
-            int id;
-            if (userId.HasValue)
+            using (var stream = new FileStream(payee.PhotoPath, FileMode.Open))
             {
-                id = userId.Value;
+                var photo = new InputOnlineFile(stream);
+                string caption = GetCaption(payee.Name, payee.Accounts);
+                await client.SendPhotoAsync(chat, photo, caption, ParseMode.Markdown);
             }
-            else
-            {
-                User me = await client.GetMeAsync();
-                id = me.Id;
-            }
-            UserProfilePhotos photos = await client.GetUserProfilePhotosAsync(id, 0, 1);
-            string photoId = photos.Photos.First().First().FileId;
-            return new InputOnlineFile(photoId);
         }
-
         private static InlineKeyboardMarkup GetReplyMarkup(BotConfiguration.Link link)
         {
             var button = new InlineKeyboardButton
