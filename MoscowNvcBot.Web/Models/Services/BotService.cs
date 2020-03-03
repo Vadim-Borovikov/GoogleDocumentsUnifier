@@ -73,7 +73,7 @@ namespace MoscowNvcBot.Web.Models.Services
 
         private readonly BotConfiguration _config;
 
-        private DataManager _googleDataManager;
+        private readonly DataManager _googleDataManager;
 
         private CancellationTokenSource _periodicCancellationSource;
         private Ping _ping;
