@@ -26,13 +26,14 @@ namespace MoscowNvcBot.Web.Models.Commands
             builder.AppendLine();
             if (fromAdmin)
             {
+                builder.AppendLine("Ведущим:");
                 AppendCommands(builder, _commands.Where(c => c.Type != AccessType.Users));
 
                 builder.AppendLine();
-                builder.AppendLine("Команды для участников:");
+                builder.AppendLine("Участникам:");
             }
 
-            AppendCommands(builder, _commands.Where(c => c.Type == AccessType.Users));
+            AppendCommands(builder, _commands.Where(c => c.Type != AccessType.Admins));
 
             return client.SendTextMessageAsync(message.Chat, builder.ToString());
         }
