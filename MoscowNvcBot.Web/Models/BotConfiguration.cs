@@ -14,7 +14,7 @@ namespace MoscowNvcBot.Web.Models
         {
             public string Name { get; set; }
             public string Url { get; set; }
-            public bool MakeButton { get; set; }
+            public string PhotoPath { get; set; }
         }
 
         public class Payee

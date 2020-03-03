@@ -76,51 +76,49 @@ namespace MoscowNvcBot.Web.Models
 
         internal static Task SendMessage(BotConfiguration.Link link, Chat chat, ITelegramBotClient client)
         {
-            if (link.MakeButton)
+            if (string.IsNullOrWhiteSpace(link.PhotoPath))
             {
-                InlineKeyboardMarkup keyboard = GetReplyMarkup(link);
-                return
-                    client.SendTextMessageAsync(chat, link.Name, replyMarkup: keyboard, disableWebPagePreview: true);
+                string text = $"[{link.Name}]({link.Url})";
+                return client.SendTextMessageAsync(chat, text, ParseMode.Markdown);
             }
 
-            string text = $"[{link.Name}]({link.Url})";
-            return client.SendTextMessageAsync(chat, text, ParseMode.Markdown);
+            InlineKeyboardMarkup keyboard = GetReplyMarkup(link);
+            return SendPhotoAsync(client, chat, link.PhotoPath, replyMarkup: keyboard);
         }
 
-        internal static async Task SendMessage(BotConfiguration.Payee payee,
+        internal static Task SendMessage(BotConfiguration.Payee payee,
             IReadOnlyDictionary<string, BotConfiguration.Link> banks, Chat chat, ITelegramBotClient client)
         {
-            bool success = PhotoIds.TryGetValue(payee.PhotoPath, out string fileId);
+            string caption = GetCaption(payee.Name, payee.Accounts, banks);
+            return SendPhotoAsync(client, chat, payee.PhotoPath, caption, ParseMode.Markdown);
+        }
+
+        private static async Task<Message> SendPhotoAsync(ITelegramBotClient client, Chat chat, string photoPath,
+            string caption = null, ParseMode parseMode = ParseMode.Default, IReplyMarkup replyMarkup = null)
+        {
+            bool success = PhotoIds.TryGetValue(photoPath, out string fileId);
             if (success)
             {
                 var photo = new InputOnlineFile(fileId);
-                await SendMessage(payee, banks, photo, chat, client);
+                return await client.SendPhotoAsync(chat, photo, caption, parseMode, replyMarkup: replyMarkup);
             }
-            else
-            {
-                using (var stream = new FileStream(payee.PhotoPath, FileMode.Open))
-                {
-                    var photo = new InputOnlineFile(stream);
-                    Message message = await SendMessage(payee, banks, photo, chat, client);
-                    fileId = message.Photo.First().FileId;
-                    PhotoIds.TryAdd(payee.PhotoPath, fileId);
-                }
-            }
-        }
 
-        private static Task<Message> SendMessage(BotConfiguration.Payee payee,
-            IReadOnlyDictionary<string, BotConfiguration.Link> banks, InputOnlineFile photo, Chat chat,
-            ITelegramBotClient client)
-        {
-            string caption = GetCaption(payee.Name, payee.Accounts, banks);
-            return client.SendPhotoAsync(chat, photo, caption, ParseMode.Markdown);
+            using (var stream = new FileStream(photoPath, FileMode.Open))
+            {
+                var photo = new InputOnlineFile(stream);
+                Message message =
+                    await client.SendPhotoAsync(chat, photo, caption, parseMode, replyMarkup: replyMarkup);
+                fileId = message.Photo.First().FileId;
+                PhotoIds.TryAdd(photoPath, fileId);
+                return message;
+            }
         }
 
         private static InlineKeyboardMarkup GetReplyMarkup(BotConfiguration.Link link)
         {
             var button = new InlineKeyboardButton
             {
-                Text = "Открыть",
+                Text = link.Name,
                 Url = link.Url
             };
             return new InlineKeyboardMarkup(button);
