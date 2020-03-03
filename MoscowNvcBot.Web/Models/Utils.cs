@@ -32,11 +32,10 @@ namespace MoscowNvcBot.Web.Models
             return datas.Where(d => d.Status != PdfData.FileStatus.Ok).ToList();
         }
 
-        internal static async Task CreateOrUpdateAsync(IEnumerable<PdfData> sources,
-            Func<PdfData, Task> createOrUpdate)
+        internal static Task CreateOrUpdateAsync(IEnumerable<PdfData> sources, Func<PdfData, Task> createOrUpdate)
         {
             List<Task> updateTasks = sources.Select(createOrUpdate).ToList();
-            await Task.WhenAll(updateTasks);
+            return Task.WhenAll(updateTasks);
         }
 
         internal static async Task<PdfData> CheckLocalPdfAsync(string sourceId, DataManager googleDataManager,
