@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -89,13 +90,32 @@ namespace MoscowNvcBot.Web.Models
         internal static async Task SendMessage(BotConfiguration.Payee payee,
             IReadOnlyDictionary<string, BotConfiguration.Link> banks, Chat chat, ITelegramBotClient client)
         {
-            using (var stream = new FileStream(payee.PhotoPath, FileMode.Open))
+            bool success = PhotoIds.TryGetValue(payee.PhotoPath, out string fileId);
+            if (success)
             {
-                var photo = new InputOnlineFile(stream);
-                string caption = GetCaption(payee.Name, payee.Accounts, banks);
-                await client.SendPhotoAsync(chat, photo, caption, ParseMode.Markdown);
+                var photo = new InputOnlineFile(fileId);
+                await SendMessage(payee, banks, photo, chat, client);
+            }
+            else
+            {
+                using (var stream = new FileStream(payee.PhotoPath, FileMode.Open))
+                {
+                    var photo = new InputOnlineFile(stream);
+                    Message message = await SendMessage(payee, banks, photo, chat, client);
+                    fileId = message.Photo.First().FileId;
+                    PhotoIds.TryAdd(payee.PhotoPath, fileId);
+                }
             }
         }
+
+        private static Task<Message> SendMessage(BotConfiguration.Payee payee,
+            IReadOnlyDictionary<string, BotConfiguration.Link> banks, InputOnlineFile photo, Chat chat,
+            ITelegramBotClient client)
+        {
+            string caption = GetCaption(payee.Name, payee.Accounts, banks);
+            return client.SendPhotoAsync(chat, photo, caption, ParseMode.Markdown);
+        }
+
         private static InlineKeyboardMarkup GetReplyMarkup(BotConfiguration.Link link)
         {
             var button = new InlineKeyboardButton
@@ -118,5 +138,8 @@ namespace MoscowNvcBot.Web.Models
         {
             return $"`{account.CardNumber}` в [{bank.Name}]({bank.Url})";
         }
+
+        private static readonly ConcurrentDictionary<string, string> PhotoIds =
+            new ConcurrentDictionary<string, string>();
     }
 }
