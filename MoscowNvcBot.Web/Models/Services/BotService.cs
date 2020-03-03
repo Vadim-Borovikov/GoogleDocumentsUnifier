@@ -33,7 +33,7 @@ namespace MoscowNvcBot.Web.Models.Services
                 new CheckListCommand(_config.CheckList),
                 new LinksCommand(_config.Links),
                 new FeedbackCommand(_config.FeedbackLink),
-                new ThanksCommand(_config.Payees)
+                new ThanksCommand(_config.Payees, _config.Banks)
             };
 
             Commands = commands.AsReadOnly();

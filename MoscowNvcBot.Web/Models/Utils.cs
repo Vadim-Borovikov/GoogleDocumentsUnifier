@@ -87,12 +87,13 @@ namespace MoscowNvcBot.Web.Models
             return client.SendTextMessageAsync(chat, text, ParseMode.Markdown);
         }
 
-        internal static async Task SendMessage(BotConfiguration.Payee payee, Chat chat, ITelegramBotClient client)
+        internal static async Task SendMessage(BotConfiguration.Payee payee,
+            IReadOnlyDictionary<string, BotConfiguration.Link> banks, Chat chat, ITelegramBotClient client)
         {
             using (var stream = new FileStream(payee.PhotoPath, FileMode.Open))
             {
                 var photo = new InputOnlineFile(stream);
-                string caption = GetCaption(payee.Name, payee.Accounts);
+                string caption = GetCaption(payee.Name, payee.Accounts, banks);
                 await client.SendPhotoAsync(chat, photo, caption, ParseMode.Markdown);
             }
         }
@@ -106,15 +107,17 @@ namespace MoscowNvcBot.Web.Models
             return new InlineKeyboardMarkup(button);
         }
 
-        private static string GetCaption(string name, IEnumerable<BotConfiguration.Payee.Account> accounts)
+        private static string GetCaption(string name, IEnumerable<BotConfiguration.Payee.Account> accounts,
+            IReadOnlyDictionary<string, BotConfiguration.Link> banks)
         {
-            string options = string.Join($" или{Environment.NewLine}", accounts.Select(GetText));
+            IEnumerable<string> texts = accounts.Select(a => GetText(a, banks[a.BankId]));
+            string options = string.Join($" или{Environment.NewLine}", texts);
             return $"{name}:{Environment.NewLine}{options}";
         }
 
-        private static string GetText(BotConfiguration.Payee.Account account)
+        private static string GetText(BotConfiguration.Payee.Account account, BotConfiguration.Link bank)
         {
-            return $"`{account.CardNumber}` в {account.Bank}";
+            return $"`{account.CardNumber}` в [{bank.Name}]({bank.Url})";
         }
     }
 }

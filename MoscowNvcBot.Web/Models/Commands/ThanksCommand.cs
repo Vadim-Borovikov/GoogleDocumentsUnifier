@@ -12,19 +12,21 @@ namespace MoscowNvcBot.Web.Models.Commands
 
         internal override AccessType Type => AccessType.Users;
 
-        public ThanksCommand(List<BotConfiguration.Payee> payees)
+        public ThanksCommand(List<BotConfiguration.Payee> payees, Dictionary<string, BotConfiguration.Link> banks)
         {
             _payees = payees;
+            _banks = banks;
         }
 
         protected override async Task ExecuteAsync(Message message, ITelegramBotClient client, bool _)
         {
             foreach (BotConfiguration.Payee payee in _payees)
             {
-                await Utils.SendMessage(payee, message.Chat, client);
+                await Utils.SendMessage(payee, _banks, message.Chat, client);
             }
         }
 
         private readonly List<BotConfiguration.Payee> _payees;
+        private readonly Dictionary<string, BotConfiguration.Link> _banks;
     }
 }

@@ -21,7 +21,7 @@ namespace MoscowNvcBot.Web.Models
         {
             public class Account
             {
-                public string Bank { get; set; }
+                public string BankId { get; set; }
                 public string CardNumber { get; set; }
             }
 
@@ -61,5 +61,7 @@ namespace MoscowNvcBot.Web.Models
         public Link FeedbackLink { get; set; }
 
         public List<Payee> Payees { get; set; }
+
+        public Dictionary<string, Link> Banks { get; set; }
     }
 }
