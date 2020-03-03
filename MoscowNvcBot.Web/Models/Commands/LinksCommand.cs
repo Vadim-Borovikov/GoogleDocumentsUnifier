@@ -10,6 +10,8 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "links";
         internal override string Description => "полезные ссылки";
 
+        internal override AccessType Type => AccessType.Users;
+
         public LinksCommand(IEnumerable<BotConfiguration.Link> links)
         {
             _links = links;

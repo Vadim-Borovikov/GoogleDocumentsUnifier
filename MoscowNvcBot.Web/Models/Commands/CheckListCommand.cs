@@ -9,8 +9,6 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "checklist";
         internal override string Description => "инструкция после вступления";
 
-        internal override bool AdminsOnly => true;
-
         public CheckListCommand(string text) { _text = text; }
 
         protected override Task ExecuteAsync(Message message, ITelegramBotClient client, bool _)

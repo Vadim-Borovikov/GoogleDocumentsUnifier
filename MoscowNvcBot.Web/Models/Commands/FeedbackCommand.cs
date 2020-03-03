@@ -9,6 +9,8 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "feedback";
         internal override string Description => "оставить обратную связь";
 
+        internal override AccessType Type => AccessType.Users;
+
         public FeedbackCommand(BotConfiguration.Link link)
         {
             _link = link;

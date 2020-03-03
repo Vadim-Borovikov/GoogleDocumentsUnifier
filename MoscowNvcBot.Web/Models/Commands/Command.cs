@@ -10,12 +10,19 @@ namespace MoscowNvcBot.Web.Models.Commands
 {
     public abstract class Command
     {
+        internal enum AccessType
+        {
+            Admins,
+            Users,
+            All
+        }
+
         internal abstract string Name { get; }
         internal abstract string Description { get; }
 
         internal bool Contains(Message message) => (message.Type == MessageType.Text) && message.Text.Contains(Name);
 
-        internal virtual bool AdminsOnly => false;
+        internal virtual AccessType Type => AccessType.Admins;
 
         internal Task ExecuteAsyncWrapper(Message message, ITelegramBotClient client, bool fromAdmin)
         {
@@ -37,6 +44,20 @@ namespace MoscowNvcBot.Web.Models.Commands
             }
 
             return HandleUsageLimitExcessAsync(chatId, client);
+        }
+
+        internal bool ShouldProceed(bool isAdmin)
+        {
+            switch (Type)
+            {
+                case AccessType.Admins:
+                    return isAdmin;
+                case AccessType.Users:
+                case AccessType.All:
+                    return true;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         protected abstract Task ExecuteAsync(Message message, ITelegramBotClient client, bool fromAdmin);
@@ -62,9 +83,19 @@ namespace MoscowNvcBot.Web.Models.Commands
         // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private void CheckAccess(User user, bool isAdmin)
         {
-            if (AdminsOnly && !isAdmin)
+            switch (Type)
             {
-                throw new Exception($"User @{user} is not in admin list!");
+                case AccessType.Admins:
+                    if (!isAdmin)
+                    {
+                        throw new Exception($"User @{user} is not in admin list!");
+                    }
+                    break;
+                case AccessType.Users:
+                case AccessType.All:
+                    return;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

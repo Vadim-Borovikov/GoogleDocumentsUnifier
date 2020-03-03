@@ -17,8 +17,6 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "update";
         internal override string Description => "обновить раздатки на Диске";
 
-        internal override bool AdminsOnly => true;
-
         public UpdateCommand(IEnumerable<string> sourceIds, string pdfFolderId, string pdfFolderPath,
             DataManager googleDataManager)
         {

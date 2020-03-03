@@ -31,7 +31,7 @@ namespace MoscowNvcBot.Web.Controllers
                         if (command != null)
                         {
                             isAdmin = IsAdmin(message.From);
-                            if (isAdmin || !command.AdminsOnly)
+                            if (command.ShouldProceed(isAdmin))
                             {
                                 try
                                 {
@@ -51,7 +51,7 @@ namespace MoscowNvcBot.Web.Controllers
                         if (command != null)
                         {
                             isAdmin = IsAdmin(query.From);
-                            if (isAdmin || !command.AdminsOnly)
+                            if (command.ShouldProceed(isAdmin))
                             {
                                 string queryData = query.Data.Replace(command.Name, "");
                                 try

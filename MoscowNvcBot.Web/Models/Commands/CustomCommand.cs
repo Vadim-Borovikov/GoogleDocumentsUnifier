@@ -18,7 +18,6 @@ namespace MoscowNvcBot.Web.Models.Commands
         internal override string Name => "custom";
         internal override string Description => "обновить, выбрать и объединить раздатки";
 
-        internal override bool AdminsOnly => true;
         public CustomCommand(List<string> sourceIds, string pdfFolderPath, DataManager googleDataManager)
         {
             _sourceIds = sourceIds;
