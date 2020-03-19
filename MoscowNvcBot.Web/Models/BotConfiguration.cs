@@ -58,6 +58,10 @@ namespace MoscowNvcBot.Web.Models
 
         public List<Link> Links { get; set; }
 
+        public string Template { get; set; }
+
+        public List<string> ExersisesLinks { get; set; }
+
         public Link FeedbackLink { get; set; }
 
         public List<Payee> Payees { get; set; }
