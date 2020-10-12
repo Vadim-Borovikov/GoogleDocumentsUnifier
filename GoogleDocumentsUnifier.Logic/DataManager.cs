@@ -8,7 +8,7 @@ namespace GoogleDocumentsUnifier.Logic
 {
     public class DataManager : IDisposable
     {
-        public DataManager(string projectJson) { _provider = new GoogleApisDriveProvider(projectJson); }
+        public DataManager(string credentialJson) { _provider = new GoogleApisDriveProvider(credentialJson); }
 
         public void Dispose() { _provider.Dispose(); }
 

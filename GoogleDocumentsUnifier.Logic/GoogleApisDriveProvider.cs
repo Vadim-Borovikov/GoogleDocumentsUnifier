@@ -15,9 +15,9 @@ namespace GoogleDocumentsUnifier.Logic
 {
     internal class GoogleApisDriveProvider : IDisposable
     {
-        public GoogleApisDriveProvider(string projectJson)
+        public GoogleApisDriveProvider(string credentialJson)
         {
-            GoogleCredential credential = GoogleCredential.FromJson(projectJson).CreateScoped(Scopes);
+            GoogleCredential credential = GoogleCredential.FromJson(credentialJson).CreateScoped(Scopes);
 
             var initializer = new BaseClientService.Initializer
             {
